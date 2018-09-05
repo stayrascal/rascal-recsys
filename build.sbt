@@ -5,7 +5,7 @@ version := "0.0.1"
 scalaVersion := "2.11.11"
 
 val sparkVersion = "2.2.0"
-val kafkaVersion = "2.0.0"
+val kafkaVersion = "1.1.1"
 val jettyVersion = "9.4.12.v20180830"
 val containerVersion = "2.25.1"
 
