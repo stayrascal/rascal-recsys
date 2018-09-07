@@ -21,7 +21,7 @@ public final class GroupLensDataModel extends FileDataModel {
     private static final Pattern COLUMN_DELIMITER_PATTERN = Pattern.compile(COLUMN_DELIMITER);
 
     public GroupLensDataModel() throws IOException {
-        this(readResourceToTempFile("/../resources/ratings.data"));
+        this(readResourceToTempFile("/../resources/ratings.dat"));
     }
 
     public GroupLensDataModel(File ratingsFile) throws IOException {

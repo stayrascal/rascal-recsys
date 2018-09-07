@@ -4,7 +4,9 @@ import com.stayrascal.recom.common.Constants;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +31,12 @@ public class KafkaProducer implements Runnable {
     @Override
     public void run() {
         Properties props = new Properties();
-        props.put("metadata.broker.list", Constants.KAFKA_ADDR);
-        props.put("serializer.class", "kafka.serializer.StringEncoder");
-        props.put("producer.type", "async");
+//        props.put("metadata.broker.list", Constants.KAFKA_ADDR);
+//        props.put("key.serializer", "kafka.serializer.StringEncoder");
+//        props.put("producer.type", "async");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, Constants.KAFKA_ADDR);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
         Producer<Integer, String> producer = null;
         try {

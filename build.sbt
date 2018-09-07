@@ -5,7 +5,7 @@ version := "0.0.1"
 scalaVersion := "2.11.11"
 
 val sparkVersion = "2.2.0"
-val kafkaVersion = "1.1.1"
+val kafkaVersion = "0.8.2.1"
 val jettyVersion = "9.4.12.v20180830"
 val containerVersion = "2.25.1"
 
@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-mllib" % sparkVersion,
   "org.apache.spark" %% "spark-streaming" % sparkVersion,
   "org.apache.spark" %% "spark-hive" % sparkVersion,
-  "org.apache.kafka" %% "kafka" % kafkaVersion,
+//  "org.apache.kafka" %% "kafka" % kafkaVersion,
 
   "org.apache.spark" %% "spark-streaming-kafka" % "1.6.3",
   "org.apache.mahout" % "mahout-mr" % "0.13.0",
