@@ -44,6 +44,7 @@ libraryDependencies ++= Seq(
   "redis.clients" % "jedis" % "2.9.0",
   "com.alibaba" % "fastjson" % "1.2.49",
   "com.github.scopt" %% "scopt" % "3.7.0",
+  "com.hankcs" % "hanlp" % "portable-1.6.8",
 
   "org.eclipse.jetty" % "jetty-server" % jettyVersion,
   "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
