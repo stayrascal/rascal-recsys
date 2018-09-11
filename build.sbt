@@ -1,26 +1,51 @@
+import Dependencies._
+import Resolvers._
+
 name := "rascal-recsys"
-version := "0.0.1"
-scalaVersion := "2.11.11"
+description := "Recommender system"
 
 val buildVersion = sys.env.get("GO_PIPELINE_LABEL") match {
   case Some(label) => s"$label"
   case _ => "1.0-SNAPSHOT"
 }
 
-lazy val libSettings = Seq(
+lazy val common = Seq(
   version := buildVersion,
   scalaVersion := "2.11.8",
-  organization := "com.stayrascal"
+  organization := "com.stayrascal",
+  resolvers ++= resolverSetting
 )
 
+lazy val assemblyCommonSettings = Seq(
+  version := buildVersion,
+  scalaVersion := "2.11.8",
+  organization := "com.stayrascal",
+  test in assembly := {}
+)
 
-lazy val root = (project in file("."))
-  .settings(libSettings: _*)
+lazy val libSettings = common ++ Seq(libraryDependencies ++= commonDeps)
+
+
+lazy val root = (project in file(".")).settings(common: _*) aggregate `application`
+
+lazy val `application` = (project in file("application"))
+  .settings(assemblyCommonSettings: _*)
+  .settings(
+    assemblyJarName in assembly := "rascal-recsys-service.jar",
+    mainClass in assembly := Some("com.stayrascal.service.application"),
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
+  )
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
 
 
 
@@ -54,5 +79,4 @@ libraryDependencies ++= Seq(
   "org.glassfish.jersey.containers" % "jersey-container-servlet-core" % containerVersion,
   "org.glassfish.jersey.containers" % "jersey-container-jetty-http" % containerVersion,
   "org.glassfish.jersey.media" % "jersey-media-moxy" % containerVersion
-
 )
