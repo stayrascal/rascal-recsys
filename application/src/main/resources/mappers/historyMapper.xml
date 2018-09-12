@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stayrascal.service.application.repository.HistoryRepository">
+
+    <select id="getNumOfUsers" resultType="NumOfUsers">
+        SELECT compName, followCompName, count(*) as quantity
+        FROM (SELECT compName, followCompName FROM history WHERE compName= #{compName})
+        GROUP BY compName, followCompName
+        ORDER BY quantity DESC
+    </select>
+
+    <select id="getHistoryForUser" resultType="HistoryRecord">
+        SELECT * FROM history WHERE userName=#{uuid} AND compName=#{compName}
+        ORDER BY freq DESC
+    </select>
+
+    <select id="getTotalFreq" resultType="TotalFreq">
+        SELECT compName, followCompName, SUM(freq) AS totalFreq
+        FROM (SELECT compName, followCompName, freq FROM history WHERE compName= #{compName})
+        GROUP BY compName, followCompName
+        ORDER BY totalFreq DESC
+    </select>
+
+    <select id="getPopularUsagesPopulation" resultType="NumOfUsers">
+        SELECT compName, followCompName, count(*) as quantity
+        FROM history
+        GROUP BY compName, followCompName
+        ORDER BY quantity DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getPopulatedUsagesCount" resultType="TotalFreq">
+        SELECT compName, followCompName, SUM(freq) AS totalFreq
+        FROM  history
+        GROUP BY compName, followCompName
+        ORDER BY totalFreq DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
