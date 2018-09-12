@@ -47,8 +47,6 @@ assemblyMergeStrategy in assembly := {
 }
 
 
-
-
 val sparkVersion = "2.2.0"
 val kafkaVersion = "0.8.2.1"
 val jettyVersion = "9.4.12.v20180830"
