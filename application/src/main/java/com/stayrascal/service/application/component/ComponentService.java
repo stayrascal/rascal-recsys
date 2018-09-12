@@ -22,5 +22,5 @@ public interface ComponentService extends FileImporter {
 
     Component addComp(Component component);
 
-    CompletableFuture<Void> rebuid();
+    CompletableFuture<Void> rebuild();
 }

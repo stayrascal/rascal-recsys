@@ -143,7 +143,7 @@ public class ComponentServiceImpl extends AbstractFileImporter<Component> implem
     @Override
     @Transactional
     @Async
-    public CompletableFuture<Void> rebuid() {
+    public CompletableFuture<Void> rebuild() {
         int offset = 0;
         int limit = 150;
         while (true) {
