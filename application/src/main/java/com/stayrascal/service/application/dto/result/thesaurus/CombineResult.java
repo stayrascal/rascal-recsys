@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-class CombineResult extends QueryResult<SynonymsGroup> {
+public class CombineResult extends QueryResult<SynonymsGroup> {
     public CombineResult(int numFound, int start, List<SynonymsGroup> data) {
         super(numFound, start, data);
     }
