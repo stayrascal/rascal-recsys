@@ -1,5 +1,7 @@
 package com.stayrascal.service.application.dict;
 
+import static com.stayrascal.service.application.constraints.SynSignal.SYN_DONE;
+
 import com.stayrascal.service.application.component.ComponentService;
 import com.stayrascal.service.application.constraints.SynSignal;
 import com.stayrascal.service.common.zookeeper.SynSignerReceiver;
@@ -36,7 +38,7 @@ public class DictStateSynService implements Consumer<String> {
     public void runIndexSyncJob() {
         service.rebuild();
         try {
-            sender.sendSynSignal(SynSignal.SYN_DONE.name());
+            sender.sendSynSignal(SYN_DONE.name());
         } catch (InterruptedException | KeeperException e) {
             e.printStackTrace();
         }
