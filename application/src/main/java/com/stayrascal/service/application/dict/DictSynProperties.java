@@ -4,15 +4,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "dict.syn")
 public class DictSynProperties {
-    private String zkHost;
+    private String zkHosts;
     private String zkPath;
 
-    public String getZkHost() {
-        return zkHost;
+    public String getZkHosts() {
+        return zkHosts;
     }
 
-    public void setZkHost(String zkHost) {
-        this.zkHost = zkHost;
+    public void setZkHosts(String zkHosts) {
+        this.zkHosts = zkHosts;
     }
 
     public String getZkPath() {

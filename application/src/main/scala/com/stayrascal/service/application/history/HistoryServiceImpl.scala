@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture
 import com.stayrascal.service.application.common.{HistoryRecordFormatUtil, PhoenixPool}
 import com.stayrascal.service.application.domain.{HistoryRecord, NumOfUsers, TotalFreq}
 import com.stayrascal.service.application.repository.HistoryRepository
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord, RecordMetadata}
+import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka010.{ConsumerStrategies, KafkaUtils, LocationStrategies}
@@ -22,13 +22,15 @@ class HistoryServiceImpl(@Autowired val sparkSession: SparkSession,
                          @Autowired val historyRepository: HistoryRepository) extends HistoryService with DisposableBean with Serializable {
   private val ssc = new StreamingContext(sparkSession.sparkContext, Seconds(2))
 
-  private val historyRecordProducer = new KafkaProducer[String, String](properties.getKafkaParamsConsumer)
+  private val historyRecordProducer = new KafkaProducer[String, String](properties.getKafkaParamsProducer)
 
   override def init(): Unit = {
-    CompletableFuture.runAsync(() => {
-      saveHistoryRecords(getHistoryRecordStream)
-      ssc.start()
-      ssc.awaitTermination()
+    CompletableFuture.runAsync(new Runnable {
+      override def run(): Unit = {
+        saveHistoryRecords(getHistoryRecordStream)
+        ssc.start()
+        ssc.awaitTermination()
+      }
     })
   }
 
@@ -100,7 +102,9 @@ class HistoryServiceImpl(@Autowired val sparkSession: SparkSession,
       throw new HistoryFormatException(s"Invalid format for history string: $historyRecord")
     }
     val topic = properties.getTopics.get(0)
-    historyRecordProducer.send(new ProducerRecord[String, String](topic, historyRecord), (metadata: RecordMetadata, exception: Exception) => {})
+    historyRecordProducer.send(new ProducerRecord[String, String](topic, historyRecord), new Callback {
+      override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {}
+    })
   }
 
   /**

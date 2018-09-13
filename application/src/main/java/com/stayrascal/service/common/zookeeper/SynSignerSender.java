@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class SynSignerSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynSignerSender.class);
@@ -23,5 +25,15 @@ public class SynSignerSender {
 
     public String getPath() {
         return path;
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
+        SynSignerSender sender = new SynSignerSender("localhost:2181", "/test");
+        Random random = new Random();
+        while (true) {
+            String value = random.nextInt(100) + "";
+            sender.sendSynSignal(value);
+            TimeUnit.SECONDS.sleep(random.nextInt(10));
+        }
     }
 }

@@ -38,4 +38,10 @@ public class SynSignerReceiver implements Watcher {
             }
         }
     }
+
+    public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
+        SynSignerReceiver receiver = new SynSignerReceiver("localhost:2181", "/test", System.out::println);
+        receiver.process();
+        Thread.sleep(Long.MAX_VALUE);
+    }
 }

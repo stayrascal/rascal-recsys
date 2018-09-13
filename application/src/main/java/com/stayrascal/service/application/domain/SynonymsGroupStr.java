@@ -1,5 +1,7 @@
 package com.stayrascal.service.application.domain;
 
+import com.stayrascal.service.application.thesaurus.SynonymsConvertor;
+
 import java.util.Objects;
 
 public class SynonymsGroupStr {

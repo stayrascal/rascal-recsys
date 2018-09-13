@@ -2,6 +2,7 @@ package com.stayrascal.recom.cf
 
 import java.util.Calendar
 
+import com.stayrascal.recom.cf.common.SimilarityMeasures._
 import com.stayrascal.recom.cf.entities.{History, UserCompPair}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
@@ -37,6 +38,7 @@ object LinearItemCFModel {
   }
 
   private def testRecommend(recommender: LinearItemCFModel, spark: SparkSession, userId: Int, compId: Int): Unit = {
+    import spark.implicits._
     val users = spark.createDataset(Seq(UserCompPair(userId, compId)))
     val start = Calendar.getInstance().getTimeInMillis
     recommender.recommendForUser(users, 3).show(truncate = false)

@@ -1,14 +1,16 @@
 package com.stayrascal.service.application.prediction
 
-import java.util
 import java.util.concurrent.TimeUnit
+import java.{lang, util}
 
 import com.stayrascal.recom.cf.LinearItemCFModel
 import com.stayrascal.recom.cf.entities.{History, UserCompPair}
+import com.stayrascal.service.application.constraints.Limits.MAX_RECOMMEND_COMP_NUM
 import com.stayrascal.service.application.constraints.Schemas.{HBaseComponentSchema, HBaseHistorySchema, HBasePredictionSchema, HBaseUsersSchema}
 import com.stayrascal.service.application.domain.Prediction
 import com.stayrascal.service.application.repository.PredictionRepository
 import io.reactivex.Observable
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import org.apache.hadoop.conf.Configuration
 import org.apache.phoenix.spark._
@@ -17,13 +19,15 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class PredictionServiceImpl(@Autowired spark: SparkSession,
                             @Autowired val hbaseConfig: Configuration,
                             @Autowired val predictionRepository: PredictionRepository) extends PredictionService with Serializable with DisposableBean {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+
+  import spark.implicits._
 
   private val parallelism = spark.sparkContext.defaultParallelism
 
@@ -36,11 +40,13 @@ class PredictionServiceImpl(@Autowired spark: SparkSession,
   override def init(): Unit = {
     Observable.interval(2, TimeUnit.MINUTES)
       .subscribeOn(Schedulers.computation())
-      .subscribe((t: lang.Long) => {
-        logger.info("Try to make prediction and save.")
-        storePrediction(makePrediction())
-        clean()
-        logger.info("Prediction has made and saved.")
+      .subscribe(new Consumer[lang.Long] {
+        override def accept(t: lang.Long): Unit = {
+          logger.info("Try to make prediction and save.")
+          storePrediction(makePrediction())
+          clean()
+          logger.info("Prediction has made and saved.")
+        }
       })
   }
 
