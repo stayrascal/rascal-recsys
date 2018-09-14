@@ -5,6 +5,7 @@ import java.util.Calendar
 import com.stayrascal.recom.cf.common.SimilarityMeasures._
 import com.stayrascal.recom.cf.entities.{History, UserCompPair}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.slf4j.LoggerFactory
 
 object LinearItemCFModel {
   def main(args: Array[String]): Unit = {
@@ -49,6 +50,8 @@ object LinearItemCFModel {
 }
 
 class LinearItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serializable {
+  val logger = LoggerFactory.getLogger(getClass.getName)
+
   def this(spark: SparkSession) = this(spark, "cooc")
 
   val defaultParallelism: Int = spark.sparkContext.defaultParallelism
@@ -74,6 +77,7 @@ class LinearItemCFModel(spark: SparkSession, similarityMeasure: String) extends 
   }
 
   def fit(history: Dataset[History]): LinearItemCFModel = {
+    logger.info("Try to fit histories.")
     this.history = Option(history)
 
     val numRaters = history.groupBy("compId", "followCompId").count()
@@ -90,6 +94,7 @@ class LinearItemCFModel(spark: SparkSession, similarityMeasure: String) extends 
       .coalesce(defaultParallelism)
       .createOrReplaceTempView("joined")
 
+    logger.info("Try to build spare matrix.")
     val sparseMatrix = spark.sql(
       """
         |SELECT compId,
@@ -103,6 +108,7 @@ class LinearItemCFModel(spark: SparkSession, similarityMeasure: String) extends 
       """.stripMargin
     ).coalesce(defaultParallelism)
 
+    logger.info("Try to calculate similarity.")
     val sim = sparseMatrix.map(row => {
       val compId = row.getInt(0)
       val followCompId1 = row.getInt(1)
@@ -130,7 +136,7 @@ class LinearItemCFModel(spark: SparkSession, similarityMeasure: String) extends 
       .selectExpr("userId", "compId", "followCompId as followCompId1", "count")
       .coalesce(defaultParallelism)
 
-    project.join(sim, Seq("compId", "followCopId1"))
+    project.join(sim, Seq("compId", "followCompId1"))
       .selectExpr("userId", "compId", "followCompId1", "followCompId2", similarityMeasure, s"$similarityMeasure * count as simProduct")
       .coalesce(defaultParallelism)
       .createOrReplaceTempView("tempView")

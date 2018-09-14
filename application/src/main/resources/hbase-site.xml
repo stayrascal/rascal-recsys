@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://localhost:8020/hbase</value>
+  </property>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>localhost</value>
+  </property>
+  <property>
+    <name>hbase.master</name>
+    <value>localhost:60000</value>
+  </property>
+  <property>
+    <name>phoenix.schema.isNamespaceMappingEnabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.clientPort</name>
+    <value>2181</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.dataDir</name>
+    <value>/usr/local/var/zookeeper</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.wal.codec</name>
+    <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
+  </property>
+  <property>
+    <name>hbase.replication</name>
+    <value>true</value>
+  </property>
+  <!-- Source ratio of 100% makes sure that each SEP consumer is actually
+       used (otherwise, some can sit idle, especially with small clusters) -->
+  <property>
+    <name>replication.source.ratio</name>
+    <value>1.0</value>
+  </property>
+  <!-- Maximum number of hlog entries to replicate in one go. If this is
+       large, and a consumer takes a while to process the events, the
+       HBase rpc call will time out. -->
+  <property>
+    <name>replication.source.nb.capacity</name>
+    <value>1000</value>
+  </property>
+  <!-- A custom replication source that fixes a few things and adds
+       some functionality (doesn't interfere with normal replication
+       usage). -->
+  <property>
+    <name>replication.replicationsource.implementation</name>
+    <value>com.ngdata.sep.impl.SepReplicationSource</value>
+  </property>
+  <!--  <property>
+    <name>hbase.zookeeper.dns.interface</name>
+    <value>lo0</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.dns.interface</name>
+    <value>lo0</value>
+  </property>
+  <property>
+    <name>hbase.master.dns.interface</name>
+    <value>lo0</value>
+  </property> -->
+  <property>
+    <name>mapreduce.output.fileoutputformat.outputdir</name>
+    <value>/temp</value>
+  </property>
+
+</configuration>
