@@ -96,9 +96,17 @@ public class ComponentServiceImpl extends AbstractFileImporter<Component> implem
             throw new ComponentException("Fail to load component.", e);
         }
         SolrDocumentList documents = response.getResults();
+
         return documents.stream()
-                .map(doc -> new Component((String) doc.get("id"), (String) doc.get("describe")))
+                .map(doc -> {
+                    String rowKey = (String) doc.get("id");
+                    return componentRepository.getComponentByName(rowKey);
+                })
                 .collect(Collectors.toList());
+
+        /*return documents.stream()
+                .map(doc -> new Component((String) doc.get("id"), (String) doc.get("describe")))
+                .collect(Collectors.toList());*/
 
     }
 
