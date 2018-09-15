@@ -4,6 +4,8 @@ public class Limits {
     //  查询构件时，一次能获取的最大构件数量
     public static final int MAX_COMPS_QUERY_NUM = 30;
 
+    public static final int MAX_ITEMS_QUERY_NUM = 30;
+
     //  所能推荐的最大构件数量
     public static final int MAX_RECOMMEND_COMP_NUM = 30;
 

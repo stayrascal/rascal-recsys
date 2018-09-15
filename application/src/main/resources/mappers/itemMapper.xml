@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stayrascal.service.application.repository.ItemRepository">
+
+    <select id="getItemByUUID" resultType="Item">
+        SELECT * FROM items WHERE uuid = #{uuid}
+    </select>
+
+    <select id="getItemById" resultType="Item">
+        SELECT * FROM items WHERE id = #{id}
+    </select>
+
+    <insert id="addItem" parameterType="Item">
+        UPSERT INTO items (id, uuid, title, content, describe, link, tags)
+        VALUES (NEXT VALUE FOR components_seq, #{item.uuid}, #{item.title}, #{item.content}, #{item.describe}, #{item.link}, #{item.tags})
+    </insert>
+
+    <update id="updateItem" parameterType="Item">
+        UPSERT INTO items (title, content, describe, link, tags)
+        VALUES (#{item.title}, #{item.content}, #{item.describe}, #{item.link}, #{item.tags})
+    </update>
+
+    <delete id="deleteItemByUUID">
+        DELETE FROM items WHERE uuid=#{uuid}
+    </delete>
+
+    <delete id="deleteItemById">
+        DELETE FROM items WHERE id=#{id}
+    </delete>
+
+    <select id="getPagedItems" resultType="Item">
+        SELECT * FROM items LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+</mapper>
