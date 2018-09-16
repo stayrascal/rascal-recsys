@@ -1,7 +1,10 @@
 package com.stayrascal.service.application.item;
 
 import com.stayrascal.service.application.domain.Item;
+import com.stayrascal.service.application.repository.ItemRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
@@ -12,9 +15,23 @@ import java.util.stream.Stream;
 
 @Service
 public class ItemServiceImpl implements ItemService {
+    private ItemRepository repository;
+
+    @Autowired
+    public ItemServiceImpl(ItemRepository repository) {
+        this.repository = repository;
+    }
+
     @Override
-    public Optional<Item> searchItems(String name) {
-        return Optional.empty();
+    public Optional<Item> searchItems(String uuid) {
+        try {
+            Item item = repository.getItemByUUID(uuid);
+            return item == null ? Optional.empty() : Optional.of(item);
+        } catch (DataAccessException e) {
+            throw new ItemException("Fail to load item: " + uuid, e);
+        }
+
+
     }
 
     @Override

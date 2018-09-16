@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface ItemService extends FileImporter {
-    Optional<Item> searchItems(String name);
+    Optional<Item> searchItems(String uuid);
 
     List<Item> searchItemLike(String titleLike);
 
