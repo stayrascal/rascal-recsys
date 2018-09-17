@@ -36,15 +36,15 @@ object UserBasedCF {
 
     val (ratingsRDD, movies) = readData(spark)
 
-    val ratingData = ratingsRDD.map(rate => MatrixEntry(rate._2.user - 1, rate._2.product - 1, rate._2.rating))
-    val ratings = new CoordinateMatrix(ratingData)
+    val ratingMatrixEntries = ratingsRDD.map(rate => MatrixEntry(rate._2.user - 1, rate._2.product - 1, rate._2.rating))
+    val ratings = new CoordinateMatrix(ratingMatrixEntries)
 
-    val matrix = ratings.transpose.toRowMatrix
-    val exactSimilarities = matrix.columnSimilarities()
-    val approxSimilarities = matrix.columnSimilarities(0.1)
+    val itemMatrix = ratings.transpose.toRowMatrix
+    val userExactSimilarities = itemMatrix.columnSimilarities()
+    val userApproxSimilarities = itemMatrix.columnSimilarities(0.1)
 
-    val exactEntries = exactSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
-    val approxEntries = approxSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
+    val exactEntries = userExactSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
+    val approxEntries = userApproxSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
 
     val MAE = exactEntries.leftOuterJoin(approxEntries).values.map {
       case (u, Some(v)) =>
@@ -56,11 +56,11 @@ object UserBasedCF {
     println(s"Average absolute error in estimate is: $MAE")
 
 
-    val ratingOfUser1 = exactSimilarities.entries.take(1).map(_.value)
+    val ratingOfUser1 = ratings.toRowMatrix().rows.take(1)(0).toArray
     val avgRatingOfUser1: Double = ratingOfUser1.sum / ratingOfUser1.size
 
-    val ratingToItem1 = matrix.rows.take(1)(0)
-    val weights: Array[Double] = approxSimilarities.entries.filter(_.i == 0).sortBy(_.j).map(_.value).collect()
+    val ratingToItem1 = itemMatrix.rows.take(1)(0).toArray
+    val weights: Array[Double] = userApproxSimilarities.entries.filter(_.i == 0).sortBy(_.j).map(_.value).collect()
     var weighted: Double = (0 to 2).map(t => weights(t) * ratingToItem1(t)).sum / weights.sum
     println("The prediction of user1 for item1: " + (avgRatingOfUser1 + weighted))
 
