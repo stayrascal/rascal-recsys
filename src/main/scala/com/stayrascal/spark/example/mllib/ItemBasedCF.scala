@@ -39,12 +39,12 @@ object UserBasedCF {
     val ratingMatrixEntries = ratingsRDD.map(rate => MatrixEntry(rate._2.user - 1, rate._2.product - 1, rate._2.rating))
     val ratings = new CoordinateMatrix(ratingMatrixEntries)
 
-    val matrix = ratings.transpose.toRowMatrix
-    val userExactSimilarities = matrix.columnSimilarities()
-    val userApproxSimilarities = matrix.columnSimilarities(0.1)
+    val matrix = ratings.toRowMatrix()
+    val itemExactSimilarities = matrix.columnSimilarities()
+    val itemApproxSimilarities = matrix.columnSimilarities(0.1)
 
-    val exactEntries = userExactSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
-    val approxEntries = userApproxSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
+    val exactEntries = itemExactSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
+    val approxEntries = itemApproxSimilarities.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
 
     val MAE = exactEntries.leftOuterJoin(approxEntries).values.map {
       case (u, Some(v)) =>
@@ -55,14 +55,13 @@ object UserBasedCF {
 
     println(s"Average absolute error in estimate is: $MAE")
 
+    val ratingOfItem1 = ratings.transpose.toRowMatrix.rows.take(1)(0).toArray
+    val avgRatingOfItem1: Double = ratingOfItem1.sum / ratingOfItem1.size
 
-    val ratingOfUser1 = ratings.toRowMatrix().rows.take(1)(0).toArray
-    val avgRatingOfUser1: Double = ratingOfUser1.sum / ratingOfUser1.size
-
-    val ratingToItem1 = matrix.rows.take(1)(0).toArray
-    val weights: Array[Double] = userApproxSimilarities.entries.filter(_.i == 0).sortBy(_.j).map(_.value).collect()
-    var weighted: Double = (0 to 2).map(t => weights(t) * ratingToItem1(t)).sum / weights.sum
-    println("The prediction of user1 for item1: " + (avgRatingOfUser1 + weighted))
+    val ratingToUser1 = matrix.rows.take(1)(0).toArray
+    val weights: Array[Double] = itemApproxSimilarities.entries.filter(_.i == 0).sortBy(_.j).map(_.value).collect()
+    var weighted: Double = (0 to 2).map(t => weights(t) * ratingToUser1(t)).sum / weights.sum
+    println("The prediction of user1 for item1: " + (avgRatingOfItem1 + weighted))
 
     spark.stop()
 
