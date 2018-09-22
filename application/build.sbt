@@ -35,4 +35,8 @@ libraryDependencies ++= Seq(
   "org.apache.phoenix" % "phoenix-spark" % "4.14.0-HBase-1.2",
   "org.apache.phoenix" % "phoenix-4.14.0-HBase-1.2-client" % "4.14.0"
     from "file:///usr/local/Cellar/apache-phoenix-4.14.0-HBase-1.2-bin/phoenix-4.14.0-HBase-1.2-client.jar"
+
+
+  // spike
+//  "org.apache.curator" % "curator-x-async" % "3.4.11" exclude("org.apache.zookeeper", "zookeeper")
 )
