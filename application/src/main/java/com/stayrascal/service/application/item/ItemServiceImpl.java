@@ -4,7 +4,7 @@ import com.stayrascal.service.application.common.AbstractFileImporter;
 import com.stayrascal.service.application.constraints.EnvVariables;
 import com.stayrascal.service.application.domain.Item;
 import com.stayrascal.service.application.repository.ItemRepository;
-import com.stayrascal.service.common.parse.CompDocumentParser;
+import com.stayrascal.service.common.parse.ItemDocumentParser;
 
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,11 +109,11 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
   @Override
   protected Reader<Item> getReader() {
     return paths -> {
-      CompDocumentParser parser = new CompDocumentParser();
+      ItemDocumentParser parser = new ItemDocumentParser();
       return paths.parallel().flatMap(path -> {
         try {
           if (parser.parse(Jsoup.parse(path.toFile(), EnvVariables.DEFAULT_CHARSET))) {
-            return parser.getRecords().stream().map(record -> new Item());
+            return parser.getItems().stream();
           }
         } catch (IOException e) {
           e.printStackTrace();
