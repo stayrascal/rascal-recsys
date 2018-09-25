@@ -8,25 +8,27 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface ItemService extends FileImporter {
-    Optional<Item> searchItems(String uuid);
+  Optional<Item> searchItems(String uuid);
 
-    List<Item> searchItemLike(String titleLike);
+  List<Item> searchItemLike(String titleLike);
 
-    Optional<Item> searchItem(int id);
+  Optional<Item> searchItem(Long id);
 
-    List<Item> searchItemsByDesc(String desc, int rows);
+  List<Item> searchItemsByDesc(String desc, int rows);
 
-    List<Item> searchItemsByTitle(String title, int rows);
+  List<Item> searchItemsByTitle(String title, int rows);
 
-    List<Item> searchItemsByContent(String content, int rows);
+  List<Item> searchItemsByContent(String content, int rows);
 
-    List<Item> searchItemsByTag(String tag, int rows);
+  List<Item> searchItemsByTag(String tag, int rows);
 
-    Item updateItem(Item item);
+  Item updateItem(Item item);
 
-    void deleteItem(String id);
+  void deleteItemByID(Long id);
 
-    Item addItem(Item component);
+  void deleteItemByUUID(String UUID);
 
-    CompletableFuture<Void> rebuild();
+  Item addItem(Item component);
+
+  CompletableFuture<Void> rebuild();
 }

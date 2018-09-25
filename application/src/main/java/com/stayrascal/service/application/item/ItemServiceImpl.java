@@ -1,11 +1,25 @@
 package com.stayrascal.service.application.item;
 
 import com.stayrascal.service.application.common.AbstractFileImporter;
+import com.stayrascal.service.application.config.SolrProperties;
 import com.stayrascal.service.application.constraints.EnvVariables;
 import com.stayrascal.service.application.domain.Item;
 import com.stayrascal.service.application.repository.ItemRepository;
 import com.stayrascal.service.common.parse.ItemDocumentParser;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -13,20 +27,17 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 @Service
 public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemService {
+  private final SolrClient solrClient;
+  private final SolrProperties properties;
   private ItemRepository repository;
 
   @Autowired
-  public ItemServiceImpl(ItemRepository repository) {
+  public ItemServiceImpl(ItemRepository repository, SolrClient solrClient, SolrProperties solrProperties) {
     this.repository = repository;
+    this.solrClient = solrClient;
+    this.properties = solrProperties;
   }
 
   @Override
@@ -37,38 +48,73 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
     } catch (DataAccessException e) {
       throw new ItemException("Fail to load item: " + uuid, e);
     }
-
-
   }
 
   @Override
   public List<Item> searchItemLike(String titleLike) {
-    return null;
+    return searchItemsByTitle(titleLike, 10);
   }
 
   @Override
-  public Optional<Item> searchItem(int id) {
-    return Optional.empty();
+  public Optional<Item> searchItem(Long id) {
+    try {
+      Item item = repository.getItemById(id);
+      return item == null ? Optional.empty() : Optional.of(item);
+    } catch (DataAccessException e) {
+      throw new ItemException("Fail to load item: " + id, e);
+    }
   }
 
   @Override
   public List<Item> searchItemsByDesc(String desc, int rows) {
-    return null;
+    SolrQuery query = new SolrQuery("describe:" + desc);
+    query.addField("uuid");
+    query.addField("describe");
+    query.setRows(rows);
+    return queryItemsFromSolr(query);
   }
 
   @Override
   public List<Item> searchItemsByTitle(String title, int rows) {
-    return null;
+    SolrQuery query = new SolrQuery("title:" + title);
+    query.addField("title");
+    query.addField("describe");
+    query.setRows(rows);
+    return queryItemsFromSolr(query);
+  }
+
+  private List<Item> queryItemsFromSolr(SolrQuery query) {
+    QueryResponse response;
+    try {
+      response = solrClient.query(properties.getCollectionName(), query);
+    } catch (SolrServerException | IOException e) {
+      throw new ItemException("Fail to load item.", e);
+    }
+    SolrDocumentList documents = response.getResults();
+    return documents.stream()
+        .map(doc -> {
+          String rowKey = (String) doc.get("uuid");
+          return repository.getItemByUUID(rowKey);
+        })
+        .collect(Collectors.toList());
   }
 
   @Override
   public List<Item> searchItemsByContent(String content, int rows) {
-    return null;
+    SolrQuery query = new SolrQuery("content:" + content);
+    query.addField("content");
+    query.addField("describe");
+    query.setRows(rows);
+    return queryItemsFromSolr(query);
   }
 
   @Override
   public List<Item> searchItemsByTag(String tag, int rows) {
-    return null;
+    SolrQuery query = new SolrQuery("tag:" + tag);
+    query.addField("tag");
+    query.addField("describe");
+    query.setRows(rows);
+    return queryItemsFromSolr(query);
   }
 
   @Override
@@ -78,8 +124,13 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
   }
 
   @Override
-  public void deleteItem(String id) {
+  public void deleteItemByID(Long id) {
     repository.deleteItemById(id);
+  }
+
+  @Override
+  public void deleteItemByUUID(String UUID) {
+    repository.deleteItemByUUID(UUID);
   }
 
   @Override
