@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS items;
 DROP SEQUENCE IF EXISTS items_seq;
-DROP INDEX IF EXISTS items_idx;
+DROP INDEX IF EXISTS items_idx ON items;
 
 create table items
 (uuid VARCHAR PRIMARY KEY,
