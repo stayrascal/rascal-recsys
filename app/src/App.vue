@@ -1,13 +1,21 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer fixed v-model="drawer" app>
+    <v-navigation-drawer fixed v-model="drawer" app dark>
       <v-list dense>
         <v-list-tile @click="toggleView('/component')">
           <v-list-tile-action>
             <v-icon>extension</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>构件检索与管理</v-list-tile-title>
+            <v-list-tile-title>构建检索与管理</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile @click="toggleView('/item')">
+          <v-list-tile-action>
+            <v-icon>event</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Item检索与管理</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-list-group prepend-icon="book" no-action>
@@ -39,7 +47,7 @@
             <v-icon>radio_button_checked</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>构件推荐</v-list-tile-title>
+            <v-list-tile-title>Item推荐</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-list-group prepend-icon="history" no-action>
@@ -70,7 +78,7 @@
     </v-navigation-drawer>
     <v-toolbar dark flat fixed app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"/>
-      <v-toolbar-title>构件检索与推荐系统</v-toolbar-title>
+      <v-toolbar-title>检索与推荐系统</v-toolbar-title>
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>
@@ -81,7 +89,7 @@
       </v-container>
     </v-content>
     <v-footer app >
-      <span class="black--text px-3">&copy; 2018</span>
+      <span class="black--text px-3">&copy; 2018 - stayrascal</span>
     </v-footer>
   </v-app>
 </template>

@@ -22,6 +22,7 @@ Vue.use(VueRx, {
   Subject
 });
 
+import Item from './components/itemManage'
 import CompManage from './components/compManage'
 import JiebaManage from './components/jiebaManage'
 import ThesaurusManage from './components/thesaurusManage'
@@ -40,7 +41,8 @@ const router = new VueRouter({
     {path: '/recommend/:uuid/:compName', component: RecommendManage},
     {path: '/history/statistics', component: HistoryStatistics},
     {path: '/history/add', component: HistoryAdd},
-    {path: '', component: CompManage}
+    {path: '', component: CompManage},
+    {path: '/item', component: Item}
   ]
 });
 
