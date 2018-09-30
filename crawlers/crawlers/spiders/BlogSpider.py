@@ -10,6 +10,6 @@ urlManager = UrlManager()
 class BlogSpider(BaseSpider):
     name = "blog"
     rules = (
-        Rule(LinkExtractor(allow=(urlManager.first_entry_matcher), process_links="process_links")),
-        Rule(LinkExtractor(allow=urlManager.start_urls), callback="process_item")
+        Rule(LinkExtractor(allow=urlManager.category_matcher), process_links="process_links"),
+        Rule(LinkExtractor(allow=urlManager.article_matcher), callback="process_item")
     )

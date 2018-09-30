@@ -15,6 +15,9 @@ class BaseSpider(CrawlSpider):
         if isinstance(response, TextResponse):
             blog = BlogItem()
             blog['url'] = response.url
+            blog['content'] = response.xpath('//article/text()').extract_first()
+            blog['title'] = response.xpath('').extract_first()
+            blog['tag'] = response.xpath('').extract_first()
             yield blog
 
     def process_link(self, links):
