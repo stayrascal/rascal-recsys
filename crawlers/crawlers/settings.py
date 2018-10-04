@@ -53,6 +53,7 @@ CONCURRENT_REQUESTS_PER_IP = 16
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
+    # 'crawlers.middlewares.SeleniumMiddleware': 50,
     'crawlers.middlewares.RandomUserAgentMiddleware': 100,
     'crawlers.middlewares.CrawlersDownloaderMiddleware': 543,
 }
@@ -67,7 +68,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'crawlers.pipelines.DuplicatesPipeline': 1,
-    'crawlers.pipelines.SaveDataToHBasePipeline': 2
+    'crawlers.pipelines.SavePipeline': 2
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -90,3 +91,7 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 HTTPCACHE_IGNORE_HTTP_CODES = [301, 302, 404]
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+SELENIUM_TIMEOUT = 20
+PHANTOMJS_SERVICE_ARGS = ['--load-images=false', '--disk-cache=true']
