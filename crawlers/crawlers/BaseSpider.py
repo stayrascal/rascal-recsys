@@ -19,13 +19,14 @@ class BaseSpider(CrawlSpider):
             # loader.add_css('url', 'site-main')
             blog = BlogItem()
             blog['url'] = response.url
-            blog['content'] = response.css('article::text')
-            # blog['content'] = response.css('.site-main::text').extract_first()
+            blog['content'] = ''.join(response.xpath('//article//text()').extract()) \
+                .replace('\n', '') \
+                .replace('\t', '').strip()
             blog['title'] = response.css('.entry-title::text').extract_first()
-            blog['tag'] = response.css('.cat-links::text').extract_first()
+            tag = response.css('.cat-links').xpath('string(.)').extract_first()
+            blog['tag'] = tag.replace('\n', '').replace('\t', '').strip() if tag else None
             blog['spider'] = self.name
             blog['date'] = time.strftime("%W--%Y/%m/%d/--%H:%M:%S")
-            print(blog)
             yield blog
 
     def process_links(self, links):

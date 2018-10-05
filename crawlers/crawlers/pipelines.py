@@ -1,5 +1,7 @@
 from scrapy.exceptions import DropItem
 
+from crawlers.HBaseConnector import HBaseConnector
+
 
 class DuplicatesPipeline(object):
     def __init__(self):
@@ -15,14 +17,13 @@ class DuplicatesPipeline(object):
 
 class SavePipeline(object):
     def __init__(self):
-        self.saver = object
+        self.saver = HBaseConnector()
         self.web_pages_cached = []
 
     def process_item(self, item, spider):
 
-        if len(self.web_pages_cached) >= 100:
-            # self.hdb.save(self.web_pages_cached)
-            map(print, self.web_pages_cached)
+        if len(self.web_pages_cached) >= 10:
+            self.saver.insert_to_web_table(self.web_pages_cached)
             self.web_pages_cached = []
         else:
             self.web_pages_cached.append(item)
