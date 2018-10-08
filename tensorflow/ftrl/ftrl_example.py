@@ -1,9 +1,9 @@
 from collections import namedtuple
 
+from sampler import FileSampler
 from sklearn.metrics import roc_auc_score
 
 from ftrl import ftrl_proximal
-from sampler import FileSampler
 
 Config = namedtuple('Config', ['alpha', 'beta', 'L1', 'L2', 'num_dim', 'train_files', 'test_files'])
 
