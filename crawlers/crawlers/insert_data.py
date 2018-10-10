@@ -1,4 +1,5 @@
 import math
+from collections import Counter
 from heapq import nlargest
 from itertools import product, count
 
@@ -118,25 +119,27 @@ def different(scores, old_scores):
 
 
 def filter_symbols(sents):
-    stopwords = create_stopwords() + ['。', ' ', '.']
+    stopwords = create_stopwords() + ['。', ' ', '.', '：']
     _sents = []
     for sentence in sents:
+        _sentence = []
         for word in sentence:
-            if word in stopwords:
-                sentence.remove(word)
-        if sentence:
-            _sents.append(sentence)
+            if word not in stopwords:
+                _sentence.append(word)
+        if _sentence:
+            _sents.append(_sentence)
     return _sents
 
 
 def filter_model(sents):
     _sents = []
     for sentence in sents:
+        _sentence = []
         for word in sentence:
-            if word not in model:
-                sentence.remove(word)
-        if sentence:
-            _sents.append(sentence)
+            if word in model:
+                _sentence.append(word)
+        if _sentence:
+            _sents.append(_sentence)
     return _sents
 
 
@@ -159,6 +162,27 @@ def summarize(text, n):
     return [sentences[i] for i in sent_index]
 
 
+def predict_proba(oword, iword):
+    '''
+    Calculate the transfer probability p(wk|wi)
+    :param oword:
+    :param iword:
+    :return:
+    '''
+    iword_vec = model[iword]
+    oword = model.wv.vocab[oword]
+    oword_l = model.trainables.syn1[oword.point].T
+    dot = np.dot(iword_vec, oword_l)
+    lprod = -sum(np.logaddexp(0, -dot) + oword.code * dot)
+    return lprod
+
+
+def get_keywords(sentence):
+    s = [w for w in sentence if w in model]
+    sentence_weight = {w: sum([predict_proba(u, w) for u in s]) for w in s}
+    return Counter(sentence_weight).most_common(10)
+
+
 if __name__ == '__main__':
     print("Starting............")
     connector = HBaseConnector()
@@ -166,12 +190,11 @@ if __name__ == '__main__':
         print("Connecting............")
         web_table = connection.table('BLOG')
         for key, data in web_table.scan():
-            rowKey = key
+            uuid = key
             title = data[b'info:title'].decode('utf-8')
             content = data[b'info:content'].decode('utf-8')
             url = data[b'info:url']
             tag = data[b'info:tag'].decode('utf-8')
 
-            result = summarize(content.replace('：', ''), 2)
-            print(result)
-            print(content)
+            describe = summarize(content, 1)[0]
+            print(get_keywords(content))
