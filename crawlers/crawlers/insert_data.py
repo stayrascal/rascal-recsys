@@ -4,6 +4,7 @@ from heapq import nlargest
 from itertools import product, count
 
 import jieba
+import requests
 import numpy as np
 from gensim.models import word2vec
 
@@ -180,7 +181,15 @@ def predict_proba(oword, iword):
 def get_keywords(sentence):
     s = [w for w in sentence if w in model]
     sentence_weight = {w: sum([predict_proba(u, w) for u in s]) for w in s}
-    return Counter(sentence_weight).most_common(10)
+    return list(map(lambda x: x[0], Counter(sentence_weight).most_common(10)))
+
+
+add_item_url = ''
+
+
+def add_item(data):
+    response = requests.post(add_item_url, data=data)
+    print(response.status_code)
 
 
 if __name__ == '__main__':
@@ -190,11 +199,15 @@ if __name__ == '__main__':
         print("Connecting............")
         web_table = connection.table('BLOG')
         for key, data in web_table.scan():
-            uuid = key
-            title = data[b'info:title'].decode('utf-8')
             content = data[b'info:content'].decode('utf-8')
-            url = data[b'info:url']
-            tag = data[b'info:tag'].decode('utf-8')
 
-            describe = summarize(content, 1)[0]
-            print(get_keywords(content))
+            item = {}
+            item['uuid'] = key.decode('utf-8')
+            item['title'] = data[b'info:title'].decode('utf-8')
+            keywords = get_keywords(jieba.cut(content))
+            print(keywords)
+            item['tags'] = ','.join(keywords) + ',' + data[b'info:tag'].decode('utf-8')
+            item['link'] = data[b'info:url']
+            item['describe'] = summarize(content, 1)[0]
+            item['content'] = ''
+            add_item(item)
