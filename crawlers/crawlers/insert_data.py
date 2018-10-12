@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math
 from collections import Counter
 from heapq import nlargest
@@ -5,6 +6,7 @@ from itertools import product, count
 
 import jieba
 import requests
+import json
 import numpy as np
 from gensim.models import word2vec
 
@@ -159,7 +161,8 @@ def summarize(text, n):
     sent_selected = nlargest(n, zip(scores, count()))
     sent_index = []
     for i in range(n):
-        sent_index.append(sent_selected[i][1])
+        if len(sent_selected) > 0:
+            sent_index.append(sent_selected[i][1])
     return [sentences[i] for i in sent_index]
 
 
@@ -184,11 +187,11 @@ def get_keywords(sentence):
     return list(map(lambda x: x[0], Counter(sentence_weight).most_common(10)))
 
 
-add_item_url = ''
+add_item_url = 'http://localhost:9090/api/v1/items'
 
 
 def add_item(data):
-    response = requests.post(add_item_url, data=data)
+    response = requests.post(add_item_url, json=data)
     print(response.status_code)
 
 
@@ -199,15 +202,32 @@ if __name__ == '__main__':
         print("Connecting............")
         web_table = connection.table('BLOG')
         for key, data in web_table.scan():
-            content = data[b'info:content'].decode('utf-8')
+            rowKey = int(key.decode('utf-8'))
+            if rowKey > 3540244584512872:
+                content = data[b'info:content'].decode('utf-8')
 
-            item = {}
-            item['uuid'] = key.decode('utf-8')
-            item['title'] = data[b'info:title'].decode('utf-8')
-            keywords = get_keywords(jieba.cut(content))
-            print(keywords)
-            item['tags'] = ','.join(keywords) + ',' + data[b'info:tag'].decode('utf-8')
-            item['link'] = data[b'info:url']
-            item['describe'] = summarize(content, 1)[0]
-            item['content'] = ''
-            add_item(item)
+                item = {}
+                item['uuid'] = key.decode('utf-8')
+                item['title'] = data[b'info:title'].decode('utf-8')
+                keywords = get_keywords(jieba.cut(content))
+                item['tags'] = ','.join(keywords) + ',' + data[b'info:tag'].decode('utf-8')
+                item['link'] = data[b'info:url'].decode('utf-8')
+                print(content)
+                summary = summarize(content, 1)
+                item['describe'] = summary[0] if len(summary) > 0 else ''
+                item['content'] = ''
+                print(item)
+                add_item(item)
+
+# if __name__ == '__main__':
+#     item = {}
+#     item['uuid'] = '1029013241869253'
+#     item['title'] = '谈谈命名'
+#     item['tags'] = '王若行,注释,编程,源代码,规范,架构,谭浩强,编码,基本,引用, 新兴技术'
+#     item['link'] = 'https://insights.thoughtworks.cn/talk-about-naming/'
+#     item['describe'] = '首先注释不能跟着所有的引用，在定义处了解了d的含义，继续往下看的话却很容易忘记；其次代码更新了，很可能会忘记修改注释，反而给把读者带入歧途。'
+#     item['content'] = ''
+#     data = json.dumps(item)
+#     print(data)
+#     response = requests.post(add_item_url, json=item)
+#     print(response)

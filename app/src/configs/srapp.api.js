@@ -5,6 +5,6 @@ let SEGMENT = BASE + '/segment';
 let THESAURUS = BASE + '/thesaurus/synonyms';
 let HISTORY = BASE + '/history';
 let RECOMMEND = BASE + '/recommend';
-let ITEM = BASE + '/item';
+let ITEM = BASE + '/items';
 
 export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM}

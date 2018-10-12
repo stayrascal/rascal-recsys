@@ -1,8 +1,6 @@
 package com.stayrascal.service.application.domain;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class Item {
   private String uuid;
@@ -11,7 +9,7 @@ public class Item {
   private String content;
   private String describe;
   private String link;
-  private Set<String> tags = new HashSet<>();
+  private String tags;
 
   public String getUuid() {
     return uuid;
@@ -61,20 +59,12 @@ public class Item {
     this.link = link;
   }
 
-  public Set<String> getTags() {
+  public String getTags() {
     return tags;
   }
 
-  public String getTagStr() {
-    return String.join(",", tags);
-  }
-
-  public void setTags(Set<String> tags) {
+  public void setTags(String tags) {
     this.tags = tags;
-  }
-
-  public void addTag(String tag) {
-    this.tags.add(tag);
   }
 
   @Override
@@ -104,7 +94,7 @@ public class Item {
             "', content='" + content +
             "', describe='" + describe +
             "', link='" + link +
-            "', tags=[" + String.join(",", tags) +
-            "]}";
+            "', tags='" + tags +
+            "'}";
   }
 }

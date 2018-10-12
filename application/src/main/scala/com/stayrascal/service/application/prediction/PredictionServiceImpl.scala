@@ -38,7 +38,7 @@ class PredictionServiceImpl(@Autowired spark: SparkSession,
   private var history: Option[Dataset[History]] = None
 
   override def init(): Unit = {
-    Observable.interval(5, TimeUnit.MINUTES)
+    Observable.interval(10, TimeUnit.MINUTES)
       .subscribeOn(Schedulers.computation())
       .subscribe(new Consumer[lang.Long] {
         override def accept(t: lang.Long): Unit = {
