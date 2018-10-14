@@ -13,23 +13,24 @@ class ftrl_proximal(object):
         self.L2 = L2
         self.num_dim = num_dim
 
-        self.n = [0.] * num_dim
-        self.z = [0.] * num_dim
-        self.w = {}
+        self.n = [0.] * num_dim  # squared sum of past gradients
+        self.z = [0.] * num_dim  # weights
+        self.w = {}  # lazy weights
 
     def predict(self, x):
         '''
         :param x: [(index, value), ...]
         :return: probability of p(y=1|x)
         '''
-        z = self.z
-        n = self.n
-        w = {}
+        z = self.z  # squared sum of past gradients
+        n = self.n  # weights
+        w = {}  # lazy weights
 
         wTx = 0.
         for f_i, f_v in x:
             if f_i >= self.num_dim or f_i < 0:
                 raise ValueError("Wrong feature index: " + str(f_i))
+
             sign = -1. if z[f_i] < 0 else 1.
             if sign * z[f_i] <= self.L1:
                 w[f_i] = 0.
@@ -40,20 +41,20 @@ class ftrl_proximal(object):
         self.w = w
         return 1. / (1. + exp(-max(min(wTx, 35.), -35.)))
 
-    def update(self, x, p, y):
+    def update(self, features, p, y):
         '''
-        :param x: [(index, value), ...]
+        :param features: [(f_i, f_v), ...]
         :param p: click probability prediction
         :param y: answer
         :return: (self.n, self.z)
         '''
-        n = self.n
-        z = self.z
-        w = self.w
+        n = self.n  # squared sum of past gradients
+        z = self.z  # weights
+        w = self.w  # lazy weights
 
-        ans = 1. if y > 0 else 0.
-        for f_i, f_v in x:
-            g = (p - ans) * f_v
-            sigma = (sqrt(n[f_i] + g * g) - sqrt(n[f_i])) / self.alpha
-            z[f_i] += g - sigma * w[f_i]
-            n[f_i] += g * g
+        y = 1. if y > 0 else 0.
+        for f_i, f_v in features:
+            g_i = (p - y) * f_v
+            sigma = (sqrt(n[f_i] + g_i * g_i) - sqrt(n[f_i])) / self.alpha
+            z[f_i] += g_i - sigma * w[f_i]
+            n[f_i] += g_i * g_i
