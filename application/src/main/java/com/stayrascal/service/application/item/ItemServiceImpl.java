@@ -21,6 +21,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.annotation.Async;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemService {
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
   private final SolrClient solrClient;
   private final SolrProperties properties;
   private ItemRepository repository;
@@ -147,6 +150,7 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
     int limit = 150;
     while (true) {
       List<Item> page = repository.getPagedItems(offset, limit);
+      logger.info("Get {} items.", page.size());
       if (page.size() > 0) {
         page.parallelStream().forEach(repository::updateItem);
         offset += limit;

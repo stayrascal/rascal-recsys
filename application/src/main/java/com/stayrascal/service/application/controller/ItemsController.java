@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
+@CrossOrigin(origins = "*")
 public class ItemsController {
 
   private ItemService service;
@@ -59,6 +61,15 @@ public class ItemsController {
     rows = Math.min(rows, MAX_ITEMS_QUERY_NUM);
     logger.debug("Searching items");
     List<Item> items = service.searchItemsByDesc(desc, rows);
+    ItemsQueryResult result = new ItemsQueryResult(items);
+    logger.debug("There are {} items found.", items.size());
+    return ResponseEntity.ok(result);
+  }
+
+  @GetMapping(value = "/api/v1/items/{id}")
+  public ResponseEntity<Result> searchItems(@PathVariable("id") Long id) {
+    logger.debug("Searching items");
+    List<Item> items = Collections.singletonList(service.searchItem(id).get());
     ItemsQueryResult result = new ItemsQueryResult(items);
     logger.debug("There are {} items found.", items.size());
     return ResponseEntity.ok(result);
