@@ -51,9 +51,9 @@ new Vue({
   el: '#app',
   router: router,
   render: h => h(App),
-  watch: {
-    "$route": 'checkLogin'
-  },
+  // watch: {
+  //   "$route": 'checkLogin'
+  // },
   created() {
     this.checkLogin();
   },

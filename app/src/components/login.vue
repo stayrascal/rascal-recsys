@@ -62,20 +62,23 @@
         this.isLoging = true;
         this.$http.post(USER + '/login', {
           params: {
-            account: this.account,
+            id: this.account,
           }
         }).then((response) => {
-          response.json().then(result => {
-            if (result['code'] === 1) {
-              let expireDays = 1000 * 60 * 60 * 24 * 15;
-              this.setCookie('session', response.data.session, expireDays);
-              this.$router.push('/component');
-            }
-          })
+          if (response.status === 200){
+            let expireDays = 1000 * 60 * 60 * 24 * 15;
+            this.setCookie('session', response.data.session, expireDays);
+            this.$router.push('/component');
+          }
         }, error => {
           //Error
         })
-      }
+      },
+      setCookie(c_name, value, expiredays) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + expiredays);
+        document.cookie = c_name + "=" + escape(value) + ((expiredays == null) ? "" : ";expires=" + exdate.toGMTString());
+      },
     }
   }
 </script>

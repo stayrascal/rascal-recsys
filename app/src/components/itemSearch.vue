@@ -49,7 +49,7 @@
       >
         <v-progress-linear slot="progress" color="blue" indeterminate/>
         <template slot="items" slot-scope="props">
-          <td class="text-xs-left">{{ props.item.name }}</td>
+          <td class="text-xs-left">{{ props.item.title }}</td>
           <td class="text-xs-left">{{ props.item.describe }}</td>
           <td class="justify-center layout px-0">
             <v-btn icon class="mx-0" @click="editItem(props.item)">
@@ -57,6 +57,9 @@
             </v-btn>
             <v-btn icon class="mx-0" @click="deleteItem(props.item)">
               <v-icon color="pink">delete</v-icon>
+            </v-btn>
+            <v-btn icon class="mx-0" @click="move(props.item)">
+              <v-icon color="blue-grey darken-2">call_split</v-icon>
             </v-btn>
           </td>
         </template>
@@ -151,20 +154,44 @@
         this.isLoading = true;
         let query = this.search.trim();
         if (query.length > 0) {
-          this.$http.get(ITEM, {
-            params: {
-              desc: this.search.trim(),
-              rows: 10
-            }
-          }).then(response => {
-            response.json().then(result => {
-              this.items = result['items'];
-              this.isLoading = false
+          this.$http.get(ITEM + '/' + query)
+            .then(response => {
+              response.json().then(result => {
+                this.items = result['items'];
+                this.isLoading = false
+              })
+            }, error => {
+              this.isLoading = false;
+              this.$message.error("Query Item information failed.")
             })
-          }, error => {
-            this.isLoading = false;
-            this.$message.error("Query Item information failed.")
-          })
+          /*if (Number.isInteger(query)) {
+            console.log(ITEM + '/' + query)
+            this.$http.get(ITEM + '/' + query)
+              .then(response => {
+                response.json().then(result => {
+                  this.items = result['items'];
+                  this.isLoading = false
+                })
+              }, error => {
+                this.isLoading = false;
+                this.$message.error("Query Item information failed.")
+              })
+          } else {
+            this.$http.get(ITEM, {
+              params: {
+                desc: this.search.trim(),
+                rows: 10
+              }
+            }).then(response => {
+              response.json().then(result => {
+                this.items = result['items'];
+                this.isLoading = false
+              })
+            }, error => {
+              this.isLoading = false;
+              this.$message.error("Query Item information failed.")
+            })
+          }*/
         } else {
           this.isLoading = false;
           this.items = []
@@ -182,6 +209,9 @@
               this.items = Object.assign([], this.items)
             }
           })
+      },
+      move(item) {
+        window.open(item.link, '_bank')
       }
     },
     watch: {
