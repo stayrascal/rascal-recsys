@@ -203,21 +203,21 @@ if __name__ == '__main__':
         web_table = connection.table('BLOG')
         for key, data in web_table.scan():
             rowKey = int(key.decode('utf-8'))
-            if rowKey > 3540244584512872:
-                content = data[b'info:content'].decode('utf-8')
+            # if rowKey > 3540244584512872:
+            content = data[b'info:content'].decode('utf-8')
 
-                item = {}
-                item['uuid'] = key.decode('utf-8')
-                item['title'] = data[b'info:title'].decode('utf-8')
-                keywords = get_keywords(jieba.cut(content))
-                item['tags'] = ','.join(keywords) + ',' + data[b'info:tag'].decode('utf-8')
-                item['link'] = data[b'info:url'].decode('utf-8')
-                print(content)
-                summary = summarize(content, 1)
-                item['describe'] = summary[0] if len(summary) > 0 else ''
-                item['content'] = ''
-                print(item)
-                add_item(item)
+            item = {}
+            item['uuid'] = key.decode('utf-8')
+            item['title'] = data[b'info:title'].decode('utf-8')
+            keywords = get_keywords(jieba.cut(content))
+            item['tags'] = ','.join(keywords) + ',' + data[b'info:tag'].decode('utf-8')
+            item['link'] = data[b'info:url'].decode('utf-8')
+            print(content)
+            summary = summarize(content, 1)
+            item['describe'] = summary[0] if len(summary) > 0 else ''
+            item['content'] = ''
+            print(item)
+            add_item(item)
 
 # if __name__ == '__main__':
 #     item = {}
