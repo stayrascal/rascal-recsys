@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,7 +72,7 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
   @Override
   public List<Item> searchItemsByDesc(String desc, int rows) {
     SolrQuery query = new SolrQuery("describe:" + desc);
-    query.addField("uuid");
+    query.addField("id");
     query.addField("describe");
     query.setRows(rows);
     return queryItemsFromSolr(query);
@@ -80,10 +81,47 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
   @Override
   public List<Item> searchItemsByTitle(String title, int rows) {
     SolrQuery query = new SolrQuery("title:" + title);
+    query.addField("id");
     query.addField("title");
-    query.addField("describe");
     query.setRows(rows);
     return queryItemsFromSolr(query);
+  }
+
+  private List<String> searchRowKeysByTitle(String title) {
+    SolrQuery query = new SolrQuery("title:" + title);
+    query.addField("id");
+    return queryRowKeyFromSolr(query);
+  }
+
+  private List<String> searchRowKeysByDesc(String desc) {
+    SolrQuery query = new SolrQuery("describe:" + desc);
+    query.addField("id");
+    return queryRowKeyFromSolr(query);
+  }
+
+  @Override
+  public List<Item> searchItemsByTitleOrDesc(String query, int rows) {
+    List<String> rowKeys = searchRowKeysByTitle(query);
+    rowKeys.addAll(searchRowKeysByDesc(query));
+    return rowKeys.stream()
+      .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+      .keySet().stream()
+      .limit(rows)
+      .map(repository::getItemByUUID)
+      .collect(Collectors.toList());
+  }
+
+  private List<String> queryRowKeyFromSolr(SolrQuery query) {
+    QueryResponse response;
+    try {
+      response = solrClient.query(properties.getCollectionName(), query);
+    } catch (SolrServerException | IOException e) {
+      throw new ItemException("Fail to load item.", e);
+    }
+    SolrDocumentList documents = response.getResults();
+    return documents.stream()
+      .map(doc -> (String) doc.get("id"))
+      .collect(Collectors.toList());
   }
 
   private List<Item> queryItemsFromSolr(SolrQuery query) {
@@ -96,7 +134,7 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
     SolrDocumentList documents = response.getResults();
     return documents.stream()
         .map(doc -> {
-          String rowKey = (String) doc.get("uuid");
+          String rowKey = (String) doc.get("id");
           return repository.getItemByUUID(rowKey);
         })
         .collect(Collectors.toList());

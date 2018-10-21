@@ -150,21 +150,14 @@
             }
           })
       },
+      isNumber(info) {
+        return /^[0-9]+$/.test(info)
+      },
       forceSearchItem: function () {
         this.isLoading = true;
         let query = this.search.trim();
         if (query.length > 0) {
-          this.$http.get(ITEM + '/' + query)
-            .then(response => {
-              response.json().then(result => {
-                this.items = result['items'];
-                this.isLoading = false
-              })
-            }, error => {
-              this.isLoading = false;
-              this.$message.error("Query Item information failed.")
-            })
-          /*if (Number.isInteger(query)) {
+          if (this.isNumber(query)) {
             console.log(ITEM + '/' + query)
             this.$http.get(ITEM + '/' + query)
               .then(response => {
@@ -179,7 +172,7 @@
           } else {
             this.$http.get(ITEM, {
               params: {
-                desc: this.search.trim(),
+                query: this.search.trim(),
                 rows: 10
               }
             }).then(response => {
@@ -191,7 +184,7 @@
               this.isLoading = false;
               this.$message.error("Query Item information failed.")
             })
-          }*/
+          }
         } else {
           this.isLoading = false;
           this.items = []

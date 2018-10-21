@@ -54,13 +54,11 @@ public class ItemsController {
   }
 
   @GetMapping(value = "/api/v1/items")
-  public ResponseEntity<Result> searchItems(@RequestParam("desc") String desc,
-                                            @RequestParam("title") String title,
-                                            @RequestParam("content") String content,
+  public ResponseEntity<Result> searchItems(@RequestParam("query") String query,
                                             @RequestParam(value = "row", defaultValue = "10") int rows) {
     rows = Math.min(rows, MAX_ITEMS_QUERY_NUM);
     logger.debug("Searching items");
-    List<Item> items = service.searchItemsByDesc(desc, rows);
+    List<Item> items = service.searchItemsByTitleOrDesc(query, rows);
     ItemsQueryResult result = new ItemsQueryResult(items);
     logger.debug("There are {} items found.", items.size());
     return ResponseEntity.ok(result);

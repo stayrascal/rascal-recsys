@@ -18,6 +18,8 @@ public interface ItemService extends FileImporter {
 
   List<Item> searchItemsByTitle(String title, int rows);
 
+  List<Item> searchItemsByTitleOrDesc(String query, int rows);
+
   List<Item> searchItemsByContent(String content, int rows);
 
   List<Item> searchItemsByTag(String tag, int rows);
