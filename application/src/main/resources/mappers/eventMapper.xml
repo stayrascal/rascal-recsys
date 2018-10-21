@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stayrascal.service.application.repository.EventRepository">
+
+    <select id="listAllEvent" resultType="Event">
+        SELECT * FROM events
+    </select>
+
+    <select id="getEventsByUserId" resultType="Event">
+        SELECT * FROM events WHERE userId = #{userId}
+    </select>
+
+    <insert id="addEvent" parameterType="Event">
+        UPSERT INTO events (id, userId, itemId, action, createTime)
+        VALUES (NEXT VALUE FOR events_seq, #{event.id}, #{event.userId}, #{event.itemId}, #{event.action}, #{event.createTime})
+    </insert>
+</mapper>

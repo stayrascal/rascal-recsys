@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stayrascal.service.application.repository.QueryLogRepository">
+
+    <select id="listAllEvent" resultType="Event">
+        SELECT * FROM events
+    </select>
+
+    <select id="getQueryLogByUserId" resultType="QueryLog">
+        SELECT * FROM query_logs WHERE userId = #{userId}
+    </select>
+
+    <insert id="addQueryLog" parameterType="QueryLog">
+        UPSERT INTO events (id, userId, query, resultCnt, clickItemId, createTime)
+        VALUES (NEXT VALUE FOR query_logs_seq, #{log.id}, #{log.userId}, #{log.query}, #{log.resultCnt}, #{event.clickItemId}, #{event.createTime})
+    </insert>
+</mapper>
