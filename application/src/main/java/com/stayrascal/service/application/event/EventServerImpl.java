@@ -3,6 +3,7 @@ package com.stayrascal.service.application.event;
 import com.stayrascal.service.application.domain.Event;
 import com.stayrascal.service.application.repository.EventRepository;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,10 @@ public class EventServerImpl implements EventService {
   @Autowired
   private EventRepository repository;
 
-
   @Override
   public Event addEvent(Event event) {
     try {
+      event.setCreateTime(new Date(System.currentTimeMillis()));
       repository.addEvent(event);
       return event;
     } catch (DataAccessException e) {

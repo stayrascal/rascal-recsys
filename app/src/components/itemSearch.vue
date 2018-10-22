@@ -75,7 +75,7 @@
 <script>
 
   import _ from 'lodash'
-  import { ITEM } from '../configs/srapp.api'
+  import { ITEM, EVENT, QUERY_LOG } from '../configs/srapp.api'
 
   export default {
     name: "itemSearch",
@@ -204,7 +204,39 @@
           })
       },
       move(item) {
+        this.addEvent(item);
+        this.addQueryLog(item);
         window.open(item.link, '_bank')
+      },
+      getCookie(name) {
+        var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+        if (arr = document.cookie.match(reg))
+          return (arr[2]);
+        else
+          return null;
+      },
+      addEvent(item) {
+        this.$http.post(EVENT, {
+          userId: this.getCookie('username'),
+          action: 'VIEW',
+          itemId: item.id
+        }).then(v => v.json().then(result => {
+          if (result['numFound'] === 1) {
+            this.$message.success("Event: " + this.getCurrentUser() + " view " + item.id + " add succeed!")
+          }
+        }), error => {
+          if (error.status === 409) {
+            this.$message.error("Event is already exist!")
+          }
+        });
+      },
+      addQueryLog(item) {
+        this.$http.post(QUERY_LOG, {
+          userId: this.getCookie('username'),
+          query: this.search.trim(),
+          resultCnt: thi.items.size(),
+          clickItemId: item.id
+        })
       }
     },
     watch: {

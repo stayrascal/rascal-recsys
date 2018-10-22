@@ -68,6 +68,7 @@
           if (response.status === 200){
             let expireDays = 1000 * 60 * 60 * 24 * 15;
             this.setCookie('session', response.data.session, expireDays);
+            this.setCookie('username', this.account, expireDays);
             this.$router.push('/component');
           }
         }, error => {

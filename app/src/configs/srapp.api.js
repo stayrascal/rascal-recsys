@@ -7,5 +7,7 @@ let HISTORY = BASE + '/history';
 let RECOMMEND = BASE + '/recommend';
 let ITEM = BASE + '/items';
 let USER = BASE + '/users';
+let EVENT = BASE + '/events';
+let QUERY_LOG = BASE + '/query';
 
-export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM, USER}
+export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM, USER, EVENT, QUERY_LOG}
