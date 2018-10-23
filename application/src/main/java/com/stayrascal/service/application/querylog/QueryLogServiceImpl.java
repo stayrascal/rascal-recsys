@@ -3,6 +3,7 @@ package com.stayrascal.service.application.querylog;
 import com.stayrascal.service.application.domain.QueryLog;
 import com.stayrascal.service.application.repository.QueryLogRepository;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class QueryLogServiceImpl implements QueryLogService {
   @Override
   public QueryLog addQueryLog(QueryLog log) {
     try {
+      log.setCreateTime(new Date(System.currentTimeMillis()));
       repository.addQueryLog(log);
       return log;
     } catch (DataAccessException e) {

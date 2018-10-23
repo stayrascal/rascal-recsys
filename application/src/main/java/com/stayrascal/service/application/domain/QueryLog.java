@@ -1,6 +1,6 @@
 package com.stayrascal.service.application.domain;
 
-import java.sql.Time;
+import java.sql.Date;
 
 public class QueryLog {
   private long id;
@@ -8,7 +8,7 @@ public class QueryLog {
   private String query;
   private int resultCnt;
   private long clickItemId;
-  private Time createTime;
+  private Date createTime;
 
   public long getId() {
     return id;
@@ -50,11 +50,11 @@ public class QueryLog {
     this.clickItemId = clickItemId;
   }
 
-  public Time getCreateTime() {
+  public Date getCreateTime() {
     return createTime;
   }
 
-  public void setCreateTime(Time createTime) {
+  public void setCreateTime(Date createTime) {
     this.createTime = createTime;
   }
 }

@@ -234,7 +234,7 @@
         this.$http.post(QUERY_LOG, {
           userId: this.getCookie('username'),
           query: this.search.trim(),
-          resultCnt: thi.items.size(),
+          resultCnt: this.items.length,
           clickItemId: item.id
         })
       }

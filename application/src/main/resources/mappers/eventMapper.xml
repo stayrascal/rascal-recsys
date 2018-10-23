@@ -15,6 +15,6 @@
 
     <insert id="addEvent" parameterType="Event">
         UPSERT INTO events (id, userId, itemId, action, createTime)
-        VALUES (NEXT VALUE FOR events_seq, #{event.id}, #{event.userId}, #{event.itemId}, #{event.action}, #{event.createTime})
+        VALUES (NEXT VALUE FOR events_seq, #{event.userId}, #{event.itemId}, #{event.action}, #{event.createTime})
     </insert>
 </mapper>

@@ -54,7 +54,7 @@
     },
     methods: {
       login() {
-        if (this.account != '' && this.password != '') {
+        if (this.user.username != '' && this.user.password != '') {
           this.toLogin();
         }
       },
@@ -62,13 +62,13 @@
         this.isLoging = true;
         this.$http.post(USER + '/login', {
           params: {
-            id: this.account,
+            id: this.user.username,
           }
         }).then((response) => {
           if (response.status === 200){
             let expireDays = 1000 * 60 * 60 * 24 * 15;
             this.setCookie('session', response.data.session, expireDays);
-            this.setCookie('username', this.account, expireDays);
+            this.setCookie('username', this.user.username, expireDays);
             this.$router.push('/component');
           }
         }, error => {
