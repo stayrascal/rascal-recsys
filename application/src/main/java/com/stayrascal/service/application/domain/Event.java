@@ -9,6 +9,7 @@ public class Event {
   private long userId;
   private long itemId;
   private Action action;
+  private String otherItems;
   private Date createTime;
 
   public long getId() {
@@ -49,5 +50,13 @@ public class Event {
 
   public void setCreateTime(Date createTime) {
     this.createTime = createTime;
+  }
+
+  public String getOtherItems() {
+    return otherItems;
+  }
+
+  public void setOtherItems(String otherItems) {
+    this.otherItems = otherItems;
   }
 }

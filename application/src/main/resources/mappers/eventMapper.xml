@@ -14,7 +14,7 @@
     </select>
 
     <insert id="addEvent" parameterType="Event">
-        UPSERT INTO events (id, userId, itemId, action, createTime)
-        VALUES (NEXT VALUE FOR events_seq, #{event.userId}, #{event.itemId}, #{event.action}, #{event.createTime})
+        UPSERT INTO events (id, userId, itemId, action, createTime, otherItems)
+        VALUES (NEXT VALUE FOR events_seq, #{event.userId}, #{event.itemId}, #{event.action}, #{event.createTime}, #{event.otherItems})
     </insert>
 </mapper>

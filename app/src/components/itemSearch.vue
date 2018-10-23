@@ -216,10 +216,13 @@
           return null;
       },
       addEvent(item) {
+        var ids = this.items.map(x => x.id);
+        ids.splice(ids.indexOf(item.id), 1)
         this.$http.post(EVENT, {
           userId: this.getCookie('username'),
           action: 'VIEW',
-          itemId: item.id
+          itemId: item.id,
+          otherItems: ids.join(',')
         }).then(v => v.json().then(result => {
           if (result['numFound'] === 1) {
             this.$message.success("Event: " + this.getCurrentUser() + " view " + item.id + " add succeed!")
