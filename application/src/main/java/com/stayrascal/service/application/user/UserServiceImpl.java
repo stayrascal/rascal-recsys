@@ -3,10 +3,11 @@ package com.stayrascal.service.application.user;
 import com.stayrascal.service.application.domain.User;
 import com.stayrascal.service.application.repository.UserRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -44,5 +45,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void removeUserByUUID(String uuid) {
         repository.deleteUserByUUID(uuid);
+    }
+
+    @Override
+    public List<User> listUsers() {
+        return repository.listUsers();
     }
 }

@@ -13,6 +13,10 @@
         SELECT * FROM items WHERE id = #{id}
     </select>
 
+    <select id="listItems" resultType="Item">
+        SELECT * FROM items
+    </select>
+
     <insert id="addItem" parameterType="Item">
         UPSERT INTO items (id, uuid, title, content, describe, link, tags)
         VALUES (NEXT VALUE FOR items_seq, #{item.uuid}, #{item.title}, #{item.content}, #{item.describe}, #{item.link}, #{item.tags})

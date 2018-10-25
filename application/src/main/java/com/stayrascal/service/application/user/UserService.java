@@ -2,6 +2,7 @@ package com.stayrascal.service.application.user;
 
 import com.stayrascal.service.application.domain.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
@@ -12,4 +13,6 @@ public interface UserService {
     Optional<User> selectUserByUUID(String uuid);
 
     void removeUserByUUID(String uuid);
+
+    List<User> listUsers();
 }

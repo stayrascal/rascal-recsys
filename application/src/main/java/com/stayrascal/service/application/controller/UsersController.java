@@ -3,10 +3,13 @@ package com.stayrascal.service.application.controller;
 import com.stayrascal.service.application.constraints.Error;
 import com.stayrascal.service.application.domain.User;
 import com.stayrascal.service.application.dto.result.ErrorResult;
+import com.stayrascal.service.application.dto.result.base.Result;
+import com.stayrascal.service.application.dto.result.user.UsersQueryResult;
 import com.stayrascal.service.application.user.UserAlreadyExistsException;
 import com.stayrascal.service.application.user.UserNotFoundException;
 import com.stayrascal.service.application.user.UserService;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,11 +40,19 @@ public class UsersController {
   public ResponseEntity login(@RequestBody User user) {
     logger.debug("User: {} try to login.", user.getId());
     Optional<User> userOptional = service.selectUserById(user.getId());
-    if (userOptional.isPresent()){
+    if (userOptional.isPresent()) {
       return ResponseEntity.ok().build();
-    }else {
+    } else {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+  }
+
+  @GetMapping(value = "/api/v1/users")
+  public ResponseEntity<Result> listUsers() {
+    List<User> users = service.listUsers();
+    UsersQueryResult result = new UsersQueryResult(users);
+    logger.debug("There are {} users found.", users.size());
+    return ResponseEntity.ok(result);
   }
 
   @ExceptionHandler(UserNotFoundException.class)

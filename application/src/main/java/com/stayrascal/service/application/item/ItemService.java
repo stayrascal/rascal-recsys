@@ -33,4 +33,6 @@ public interface ItemService extends FileImporter {
   Item addItem(Item component);
 
   CompletableFuture<Void> rebuild();
+
+  List<Item> listItems();
 }

@@ -73,6 +73,15 @@ public class ItemsController {
     return ResponseEntity.ok(result);
   }
 
+  @GetMapping(value = "/api/v1/items")
+  public ResponseEntity<Result> listItems() {
+    logger.debug("Searching items");
+    List<Item> items = service.listItems();
+    ItemsQueryResult result = new ItemsQueryResult(items);
+    logger.debug("There are {} items found.", items.size());
+    return ResponseEntity.ok(result);
+  }
+
   @PostMapping(value = "/api/v1/items")
   public ResponseEntity<Result> addItem(@RequestBody Item item) {
     logger.debug("Adding item: {}", item.getId());

@@ -18,6 +18,10 @@
         SELECT * FROM users WHERE uuid = #{uuid}
     </select>
 
+    <select id="listUsers" resultType="User">
+        SELECT * FROM users
+    </select>
+
     <delete id="deleteUserByUUID">
         DELETE FROM users WHERE uuid = #{uuid}
     </delete>

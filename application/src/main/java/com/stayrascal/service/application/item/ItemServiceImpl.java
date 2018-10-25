@@ -200,6 +200,11 @@ public class ItemServiceImpl extends AbstractFileImporter<Item> implements ItemS
   }
 
   @Override
+  public List<Item> listItems() {
+    return repository.listItems();
+  }
+
+  @Override
   protected Reader<Item> getReader() {
     return paths -> {
       ItemDocumentParser parser = new ItemDocumentParser();
