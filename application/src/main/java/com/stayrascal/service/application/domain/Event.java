@@ -12,6 +12,11 @@ public class Event {
   private String otherItems;
   private Date createTime;
 
+  public Event(long userId, long itemId) {
+    this.userId = userId;
+    this.itemId = itemId;
+  }
+
   public long getId() {
     return id;
   }

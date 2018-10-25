@@ -3,9 +3,9 @@ package com.stayrascal.recom.cf
 import java.util.Calendar
 
 import com.stayrascal.recom.cf.common.SimilarityMeasures._
-import com.stayrascal.recom.cf.entities.{History, Record, User, UserCompPair}
+import com.stayrascal.recom.cf.entities.{Record, User}
 import com.stayrascal.service.application.domain.Event
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 
 object ItemCFModel {
@@ -17,31 +17,30 @@ object ItemCFModel {
 
     import spark.implicits._
 
-    val recommender = new LinearItemCFModel(spark)
-    //    val history = spark.read.csv(args(0))
+    val recommender = new ItemCFModel(spark)
     val history = spark.read.csv("./data/history/history.csv")
-      .map(row => History(row.getString(0).toInt, row.getString(1).toInt, row.getString(2).toInt, row.getString(3).toFloat))
+      .map(row => new Event(row.getString(0).toInt, row.getString(1).toInt))
       .coalesce(spark.sparkContext.defaultParallelism)
       .cache()
 
     recommender.fit(history)
 
     showSimilarities(recommender)
-    testRecommend(recommender, spark, args(1).toInt, args(2).toInt)
+    testRecommend(recommender, spark, args(1).toInt, args(2).toString)
   }
 
-  private def showSimilarities(recommender: LinearItemCFModel): Unit = {
+  private def showSimilarities(recommender: ItemCFModel): Unit = {
     val start = Calendar.getInstance().getTimeInMillis
     recommender.getSimilarities.get
-      .sort("compId", "followCompId1", "followCompId2", "cooc")
+      .sort("itemId_01", "itemId_02", "cooc")
       .show()
     val end = Calendar.getInstance().getTimeInMillis
     println(s"Total cost: ${(end - start) / 1000f} s")
   }
 
-  private def testRecommend(recommender: LinearItemCFModel, spark: SparkSession, userId: Int, compId: Int): Unit = {
+  private def testRecommend(recommender: ItemCFModel, spark: SparkSession, userId: Int, userName: String = ""): Unit = {
     import spark.implicits._
-    val users = spark.createDataset(Seq(UserCompPair(userId, compId)))
+    val users = spark.createDataset(Seq(User(userId, userName)))
     val start = Calendar.getInstance().getTimeInMillis
     recommender.recommendForUser(users, 3).show(truncate = false)
     val end = Calendar.getInstance().getTimeInMillis
@@ -73,7 +72,7 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
 
     this.records = Option(views)
 
-    val viewDF =views.toDF("userId", "itemId", "view")
+    val viewDF = views.toDF("userId", "itemId", "view")
       .coalesce(defaultParallelism)
 
     val numRatersPerItem = viewDF.groupBy("itemId").count().alias("nor")
@@ -113,7 +112,7 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
 
     var sim = sparseMatrix.map(row => {
       val size = row.getAs[Long](2)
-      val dotProduct =row.getAs[Double](3)
+      val dotProduct = row.getAs[Double](3)
       val viewSum1 = row.getAs[Double](4)
       val viewSum2 = row.getAs[Double](5)
       val viewSumOfSq1 = row.getAs[Double](6)
@@ -131,26 +130,25 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
     }).toDF("itemId_01", "itemId_02", "cooc", "corr", "regCorr", "cosSim", "impCosSim", "jaccard")
 
     sim.withColumnRenamed("itemId_01", "itemId_02")
-        .withColumnRenamed("itemId_02", "itemId_01")
-        .union(sim)
-        .repartition(defaultParallelism)
-        .cache()
+      .withColumnRenamed("itemId_02", "itemId_01")
+      .union(sim)
+      .repartition(defaultParallelism)
+      .cache()
     similarities = Option(sim)
     this
   }
 
   def recommendForUser(users: Dataset[User], num: Int): DataFrame = {
     var sim = similarities.get.select("itemId_01", "itemId_02", similarityMeasure)
-    val eventsDs = records.get
-    val project: DataFrame = users
+    val recordDs = records.get
+    val userRecords: DataFrame = users
       .selectExpr("userId as user")
-      .join(eventsDs, $"user" <=> eventsDs("userId"), "left")
+      .join(recordDs, $"user" <=> recordDs("userId"), "left")
       .drop($"user")
       .select("userId", "itemId", "view")
 
-    project.join(sim, $"itemId" <=> sim("itemId_01"))
-      .selectExpr("userId", "itemId_01 as relatedItem", "itemId_02 as otherItem", similarityMeasure,
-        s"$similarityMeasure * view as simProduct")
+    userRecords.join(sim, $"itemId" <=> sim("itemId_01"))
+      .selectExpr("userId", "itemId_01 as relatedItem", "itemId_02 as otherItem", similarityMeasure, s"$similarityMeasure * view as simProduct")
       .coalesce(defaultParallelism)
       .createOrReplaceTempView("tempTable")
 
@@ -171,10 +169,10 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
         var count = 0
         while (iter.hasNext && count < num) {
           val rat = iter.next()
-          if (rat._2 ! = Double.NaN) {
+          if (rat._2 != Double.NaN) {
             sequence :+= (rat._1, rat._2)
           }
-          count +=1
+          count += 1
         }
         sequence
       }).toDF("userId", "recommended")
