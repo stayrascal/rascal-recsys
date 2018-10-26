@@ -73,7 +73,7 @@ public class ItemsController {
     return ResponseEntity.ok(result);
   }
 
-  @GetMapping(value = "/api/v1/items")
+  @GetMapping(value = "/api/v1/items/all")
   public ResponseEntity<Result> listItems() {
     logger.debug("Searching items");
     List<Item> items = service.listItems();

@@ -3,8 +3,7 @@ package com.stayrascal.recom.cf
 import java.util.Calendar
 
 import com.stayrascal.recom.cf.common.SimilarityMeasures._
-import com.stayrascal.recom.cf.entities.{Record, User}
-import com.stayrascal.service.application.domain.Event
+import com.stayrascal.recom.cf.entities.{Event, Record, User}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 
@@ -19,7 +18,7 @@ object ItemCFModel {
 
     val recommender = new ItemCFModel(spark)
     val history = spark.read.csv("./data/history/history.csv")
-      .map(row => new Event(row.getString(0).toInt, row.getString(1).toInt))
+      .map(row => Event(row.getString(0).toInt, row.getString(1).toInt))
       .coalesce(spark.sparkContext.defaultParallelism)
       .cache()
 

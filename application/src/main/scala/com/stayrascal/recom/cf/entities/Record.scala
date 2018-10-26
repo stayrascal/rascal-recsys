@@ -11,3 +11,5 @@ case class HistoryWithName(user: String, comp: String, followComp: String, count
 case class UserCompPair(userId: Int, compId: Int)
 
 case class Record(userId: Int, itemId: Int, view: Float)
+
+case class Event(userId: Int, itemId: Int)
