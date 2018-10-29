@@ -90,4 +90,16 @@
 调优可以通过系统配置、程序编写和作业调度算法来进行。
 1. 通过spark-env文件、程序中SparkConf和set property设置。
     - 计算量大，形成的lineage过大应该给已经缓存了的rdd添加checkpoint，以减少容错带来的开销。 
-    - 小分区合并，过小的分区造成过多的切换任务开销，使用repartition。   
+    - 小分区合并，过小的分区造成过多的切换任务开销，使用repartition。
+    
+### Hive UDF VS UDAF VS UDTF
+- UDF
+    - 自定义UDF需要继承org.apache.hadoop.hive.ql.UDF
+    - UDF只能实现一进一出的操作，如果需要实现多进一出，则需要实现UDAF
+- UDAF
+    - 函数类需要继承UDAF类，内部类Evaluator实UDAFEvaluator接口。
+    - UDF是基于单条记录的列进行的计算操作，而UDFA则是用户自定义的聚类函数，是基于表的所有记录进行的计算操作。
+- UDTF: User-Defined Table-Generating Functions
+    - UDTF用来解决输入一行输出多行(On-to-many maping)的需求。
+    - 继承GenericUDTF
+    - UDTF有两种使用方法，一种直接放到select后面，一种和lateral view一起使用。   
