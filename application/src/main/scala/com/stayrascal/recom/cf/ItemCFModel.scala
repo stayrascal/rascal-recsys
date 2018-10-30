@@ -137,7 +137,7 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
     this
   }
 
-  def recommendForUser(users: Dataset[User], num: Int): DataFrame = {
+  def recommendForUser(users: Dataset[User], num: Int, similarityMeasure: String): DataFrame = {
     var sim = similarities.get.select("itemId_01", "itemId_02", similarityMeasure)
     val recordDs = records.get
     val userRecords: DataFrame = users
@@ -174,6 +174,8 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
           count += 1
         }
         sequence
-      }).toDF("userId", "recommended")
+      })
+      .flatMap(xs => xs._2.map(xs2 => (xs._1, xs2._1, xs2._2, similarityMeasure)))
+      .toDF("userId", "itemId", "score", "measure")
   }
 }

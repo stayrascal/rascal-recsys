@@ -4,8 +4,9 @@ import java.util.concurrent.TimeUnit
 import java.{lang, util}
 
 import com.stayrascal.recom.cf.ItemCFModel
-import com.stayrascal.recom.cf.entities.Event
-import com.stayrascal.service.application.constraints.Schemas.{HBaseEventsSchema, HBaseRecommendationSchema, HBaseUsersSchema}
+import com.stayrascal.recom.cf.entities.{Event, User}
+import com.stayrascal.service.application.constraints.Limits.MAX_RECOMMEND_COMP_NUM
+import com.stayrascal.service.application.constraints.Schemas.{HBaseEventsSchema, HBaseItemsSchema, HBaseRecommendationSchema, HBaseUsersSchema}
 import com.stayrascal.service.application.domain.{Prediction, Recommendation}
 import com.stayrascal.service.application.repository.RecommendRepository
 import io.reactivex.Observable
@@ -25,6 +26,8 @@ class RecommendServiceImpl(@Autowired spark: SparkSession,
                            @Autowired val recommendRepository: RecommendRepository) extends PredictionService with Serializable with DisposableBean {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
+  import spark.implicits._
+
   private val parallelism = spark.sparkContext.defaultParallelism
 
   private val itemCFModel = new ItemCFModel(spark)
@@ -34,7 +37,24 @@ class RecommendServiceImpl(@Autowired spark: SparkSession,
   private var events: Option[Dataset[Event]] = None
 
   override def makePrediction(): DataFrame = {
-    val userSet = getEvent
+    val userSet = getEvent.select("userId")
+      .map(row => User(row.getInt(0), null))
+    val recommendationModel = itemCFModel
+      .fit(getEvent)
+    val recommendation = recommendationModel
+      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "cooc")
+      .union(recommendationModel
+        .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "corr"))
+      .union(recommendationModel
+        .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "regCorr"))
+      .union(recommendationModel
+        .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "cosSim"))
+      .union(recommendationModel
+        .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "impCosSim"))
+      .union(recommendationModel
+        .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "jaccard"))
+      .coalesce(parallelism)
+    recommendation
   }
 
 
@@ -42,7 +62,26 @@ class RecommendServiceImpl(@Autowired spark: SparkSession,
     events.getOrElse {
       loadEvents().coalesce(parallelism).createOrReplaceTempView("events")
       getUsers.createOrReplaceTempView("users")
+      getItems.createOrReplaceTempView("items")
+      val eventDF = spark.sql(
+        """
+          | SELECT userId, itemId
+          | FROM events
+        """.stripMargin
+      )
+        .map(row => Event(row.getInt(0), row.getInt(1)))
+        .coalesce(parallelism)
+        .cache()
+      events = Option(eventDF)
+      eventDF
+    }
+  }
 
+  private def getItems: DataFrame = {
+    items.getOrElse {
+      val itemDF = loadItems().coalesce(parallelism).cache()
+      items = Option(itemDF)
+      itemDF
     }
   }
 
@@ -52,6 +91,14 @@ class RecommendServiceImpl(@Autowired spark: SparkSession,
       users = Option(usrs)
       usrs
     }
+  }
+
+  private def loadItems(): DataFrame = {
+    spark.sqlContext.phoenixTableAsDataFrame(
+      HBaseItemsSchema.TABLE_NAME,
+      Seq(HBaseItemsSchema.ID_QUALIFIER),
+      conf = hbaseConfig
+    )
   }
 
   private def loadEvents(): DataFrame = {
