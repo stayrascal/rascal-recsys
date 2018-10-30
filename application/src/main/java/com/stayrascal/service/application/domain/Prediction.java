@@ -66,7 +66,6 @@ public class Prediction {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(userName, compName, followCompName, prediction);
     }
 

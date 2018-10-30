@@ -7,7 +7,7 @@ import com.stayrascal.recom.cf.LinearItemCFModel
 import com.stayrascal.recom.cf.entities.{History, UserCompPair}
 import com.stayrascal.service.application.constraints.Limits.MAX_RECOMMEND_COMP_NUM
 import com.stayrascal.service.application.constraints.Schemas.{HBaseComponentSchema, HBaseHistorySchema, HBasePredictionSchema, HBaseUsersSchema}
-import com.stayrascal.service.application.domain.Prediction
+import com.stayrascal.service.application.domain.{Prediction, Recommendation}
 import com.stayrascal.service.application.repository.PredictionRepository
 import io.reactivex.Observable
 import io.reactivex.functions.Consumer
@@ -185,4 +185,6 @@ class PredictionServiceImpl(@Autowired spark: SparkSession,
   override def destroy(): Unit = {
     spark.stop()
   }
+
+  override def recommend(userId: Long, itemId: Long, num: Int, measureType: String): util.List[Recommendation] = ???
 }

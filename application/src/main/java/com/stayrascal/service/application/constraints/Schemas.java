@@ -35,6 +35,19 @@ public class Schemas {
         public final static String PREDICTION_QUALIFIER = "FREQ";
     }
 
+    public static class HBaseRecommendationSchema {
+        public final static String TABLE_NAME = "recommendation";
+        public final static String USER_QUALIFIER = "userId";
+        public final static String ITEM_QUALIFIER = "itemId";
+    }
+
+    public static class HBaseEventsSchema {
+        public final static String TABLE_NAME = "events";
+        public final static String USER_QUALIFIER = "userId";
+        public final static String ITEM_QUALIFIER = "itemId";
+        public final static String ACTION_QUALIFIER = "action";
+    }
+
     /**
      * 存储于HBase中的jieba字典表结构
      */
