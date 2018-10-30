@@ -21,9 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class RecommendServiceImpl(@Autowired spark: SparkSession,
-                           @Autowired val hbaseConfig: Configuration,
-                           @Autowired val recommendRepository: RecommendRepository) extends PredictionService with Serializable with DisposableBean {
+class RecommendService(@Autowired spark: SparkSession,
+                       @Autowired val hbaseConfig: Configuration,
+                       @Autowired val recommendRepository: RecommendRepository) extends PredictionService with Serializable with DisposableBean {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   import spark.implicits._

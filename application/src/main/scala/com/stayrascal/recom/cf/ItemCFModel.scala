@@ -41,7 +41,7 @@ object ItemCFModel {
     import spark.implicits._
     val users = spark.createDataset(Seq(User(userId, userName)))
     val start = Calendar.getInstance().getTimeInMillis
-    recommender.recommendForUser(users, 3).show(truncate = false)
+    recommender.recommendForUser(users, 3, "cooc").show(truncate = false)
     val end = Calendar.getInstance().getTimeInMillis
     println(s"Total cost: ${(end - start) / 1000f} s")
   }

@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+//@Service
 class PredictionServiceImpl(@Autowired spark: SparkSession,
                             @Autowired val hbaseConfig: Configuration,
                             @Autowired val predictionRepository: PredictionRepository) extends PredictionService with Serializable with DisposableBean {
