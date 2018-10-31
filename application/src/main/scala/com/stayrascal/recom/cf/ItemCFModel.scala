@@ -66,7 +66,7 @@ class ItemCFModel(spark: SparkSession, similarityMeasure: String) extends Serial
     logger.info("Try to fit records.")
 
     val views: Dataset[Record] = events.groupBy("userId", "itemId").count()
-      .map(row => Record(row.getInt(0), row.getInt(1), row.getFloat(3)))
+      .map(row => Record(row.getLong(0).toInt, row.getLong(1).toInt, row.getLong(2)))
       .coalesce(defaultParallelism)
 
     this.records = Option(views)

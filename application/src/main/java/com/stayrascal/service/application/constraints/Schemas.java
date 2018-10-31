@@ -37,21 +37,23 @@ public class Schemas {
 
   public static class HBaseRecommendationSchema {
     public final static String TABLE_NAME = "recommendation";
-    public final static String USER_QUALIFIER = "userId";
-    public final static String ITEM_QUALIFIER = "itemId";
+    public final static String USER_QUALIFIER = "USERID";
+    public final static String ITEM_QUALIFIER = "ITEMID";
+    public final static String SCORE_QUALIFIER = "SCORE";
+    public final static String MEASURETYPE_QUALIFIER = "MEASURETYPE";
   }
 
   public static class HBaseEventsSchema {
     public final static String TABLE_NAME = "events";
-    public final static String USER_QUALIFIER = "userId";
-    public final static String ITEM_QUALIFIER = "itemId";
-    public final static String ACTION_QUALIFIER = "action";
+    public final static String USER_QUALIFIER = "INFO.USERID";
+    public final static String ITEM_QUALIFIER = "INFO.ITEMID";
+    public final static String ACTION_QUALIFIER = "INFO.ACTION";
   }
 
   public static class HBaseItemsSchema {
     public final static String TABLE_NAME = "items";
-    public final static String ID_QUALIFIER = "id";
-    public final static String TITLE_QUALIFIER = "title";
+    public final static String ID_QUALIFIER = "ID";
+    public final static String TITLE_QUALIFIER = "TITLE";
   }
 
   /**

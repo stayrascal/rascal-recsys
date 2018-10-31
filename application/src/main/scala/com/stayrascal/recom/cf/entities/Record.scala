@@ -12,4 +12,4 @@ case class UserCompPair(userId: Int, compId: Int)
 
 case class Record(userId: Int, itemId: Int, view: Float)
 
-case class Event(userId: Int, itemId: Int)
+case class Event(userId: Long, itemId: Long)
