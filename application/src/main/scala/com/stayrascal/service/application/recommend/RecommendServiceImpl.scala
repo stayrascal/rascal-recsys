@@ -24,7 +24,7 @@ class RecommendServiceImpl(@Autowired userService: UserService,
     predictionService.getPrediction(userName, compName, num)
   }
 
-  override def recommendForUser(userId: Long, itemId: Long, num: Int, measureType: String): util.List[Recommendation] = {
-    predictionService.recommend(userId, itemId, num, measureType)
+  override def recommendForUser(userId: Long, num: Int, measureType: String): util.List[Recommendation] = {
+    predictionService.recommend(userId, num, measureType)
   }
 }

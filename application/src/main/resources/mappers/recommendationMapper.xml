@@ -7,7 +7,7 @@
 
     <select id="getRecommendation" resultType="Recommendation">
         SELECT * FROM recommendation WHERE userId = #{userId}
-        AND itemId = #{itemId} AND measureType = #{measureType}
+        AND measureType = #{measureType}
         ORDER BY score desc
         limit #{num}
     </select>

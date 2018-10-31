@@ -10,7 +10,7 @@ trait PredictionService {
 
   def getPrediction(userName: String, compName: String, num: Int): java.util.List[Prediction]
 
-  def recommend(userId: Long, itemId: Long, num:Int, measureType: String): java.util.List[Recommendation]
+  def recommend(userId: Long, num:Int, measureType: String): java.util.List[Recommendation]
 
   def init(): Unit
 

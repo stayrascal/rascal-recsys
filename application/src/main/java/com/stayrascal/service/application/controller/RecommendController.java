@@ -37,10 +37,9 @@ public class RecommendController {
 
   @GetMapping(value = "/api/v1/recommend")
   public ResponseEntity<Result> recommend(@RequestParam("userId") Long userId,
-                                          @RequestParam("itemId") Long itemId,
                                           @RequestParam("num") int num,
                                           @RequestParam("type") String measureType) {
-    List<Recommendation> result = service.recommendForUser(userId, itemId, num, measureType);
+    List<Recommendation> result = service.recommendForUser(userId, num, measureType);
     return ResponseEntity.ok(new RecommendResult(result));
   }
 }

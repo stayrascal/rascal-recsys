@@ -153,8 +153,8 @@ class RecommendService(@Autowired spark: SparkSession,
 
   override def getPrediction(userName: String, compName: String, num: Int): util.List[Prediction] = ???
 
-  override def recommend(userId: Long, itemId: Long, num: Int, measureType: String): util.List[Recommendation] = {
-    recommendRepository.getRecommendation(userId, itemId, num, measureType)
+  override def recommend(userId: Long, num: Int, measureType: String): util.List[Recommendation] = {
+    recommendRepository.getRecommendation(userId, num, measureType)
   }
 
   override def init(): Unit = {

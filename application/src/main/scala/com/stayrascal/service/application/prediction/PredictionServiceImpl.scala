@@ -186,5 +186,5 @@ class PredictionServiceImpl(@Autowired spark: SparkSession,
     spark.stop()
   }
 
-  override def recommend(userId: Long, itemId: Long, num: Int, measureType: String): util.List[Recommendation] = ???
+  override def recommend(userId: Long, num: Int, measureType: String): util.List[Recommendation] = ???
 }
