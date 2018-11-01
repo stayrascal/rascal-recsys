@@ -30,56 +30,16 @@ class RecommendService(@Autowired spark: SparkSession,
 
   private val parallelism = spark.sparkContext.defaultParallelism
 
-  private val itemCFModel = new ItemCFModel(spark)
-
+  private var itemCFModel = new ItemCFModel(spark)
   private var users: Option[DataFrame] = None
   private var items: Option[DataFrame] = None
   private var events: Option[Dataset[Event]] = None
 
-  override def makePrediction(): DataFrame = {
-    val userSet = getEvent.select("userId")
-      .map(row => User(row.getLong(0).toInt, null))
-    val recommendationModel = itemCFModel
-      .fit(getEvent)
-    val coocDF = recommendationModel
-      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "cooc")
-      .coalesce(parallelism)
-      .cache()
-    val corrDF = recommendationModel
-      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "corr")
-      .coalesce(parallelism)
-      .cache()
-    val regCorrDF = recommendationModel
-      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "regCorr")
-      .coalesce(parallelism)
-      .cache()
-    val cosSimDF = recommendationModel
-      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "cosSim")
-      .coalesce(parallelism)
-      .cache()
-    val impCosSimDF = recommendationModel
-      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "impCosSim")
-      .coalesce(parallelism)
-      .cache()
-    val jaccardDF = recommendationModel
-      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, "jaccard")
-      .coalesce(parallelism)
-      .cache()
-    val recommendation = coocDF
-      .union(corrDF)
-      .union(regCorrDF)
-      .union(cosSimDF)
-      .union(impCosSimDF)
-      .union(jaccardDF)
+  override def makePrediction(userSet: Dataset[User], measureType: String = "cooc"): DataFrame = {
+    itemCFModel
+      .recommendForUser(userSet, MAX_RECOMMEND_COMP_NUM, measureType)
       .coalesce(parallelism)
       .toDF("USERID", "ITEMID", "SCORE", "MEASURETYPE")
-    coocDF.unpersist()
-    corrDF.unpersist()
-    regCorrDF.unpersist()
-    cosSimDF.unpersist()
-    impCosSimDF.unpersist()
-    jaccardDF.unpersist()
-    recommendation
   }
 
 
@@ -163,7 +123,19 @@ class RecommendService(@Autowired spark: SparkSession,
       .subscribe(new Consumer[lang.Long] {
         override def accept(t: lang.Long): Unit = {
           logger.info("Try to make recommendation and save.")
-          storePrediction(makePrediction())
+
+          val userSet: Dataset[User] = getEvent.select("userId")
+            .map(row => User(row.getLong(0).toInt, null))
+
+          itemCFModel = itemCFModel.fit(getEvent)
+
+          storePrediction(makePrediction(userSet, "cooc"))
+          storePrediction(makePrediction(userSet, "corr"))
+          storePrediction(makePrediction(userSet, "regCorr"))
+          storePrediction(makePrediction(userSet, "cosSim"))
+          storePrediction(makePrediction(userSet, "impCosSim"))
+          storePrediction(makePrediction(userSet, "jaccard"))
+
           clean()
           logger.info("Recommendation has made and saved.")
         }

@@ -4,6 +4,9 @@
       <v-flex>
         <item-search/>
       </v-flex>
+      <v-flex class="py-2">
+        <item-rec/>
+      </v-flex>
       <!--<v-flex class="py-2">
         <item-import/>
       </v-flex>-->
@@ -18,10 +21,11 @@
   import ItemSearch from './itemSearch';
   import ItemImport from './itemImport';
   import ItemAdd from './itemAdd';
+  import ItemRec from './itemRec'
 
   export default {
     name: "itemManage",
-    components: { ItemAdd, ItemImport, ItemSearch }
+    components: { ItemAdd, ItemImport, ItemSearch, ItemRec }
   }
 </script>
 

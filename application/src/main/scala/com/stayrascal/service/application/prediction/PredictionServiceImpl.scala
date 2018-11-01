@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 import java.{lang, util}
 
 import com.stayrascal.recom.cf.LinearItemCFModel
-import com.stayrascal.recom.cf.entities.{History, UserCompPair}
+import com.stayrascal.recom.cf.entities.{History, User, UserCompPair}
 import com.stayrascal.service.application.constraints.Limits.MAX_RECOMMEND_COMP_NUM
 import com.stayrascal.service.application.constraints.Schemas.{HBaseComponentSchema, HBaseHistorySchema, HBasePredictionSchema, HBaseUsersSchema}
 import com.stayrascal.service.application.domain.{Prediction, Recommendation}
@@ -71,7 +71,7 @@ class PredictionServiceImpl(@Autowired spark: SparkSession,
     prediction.saveToPhoenix(HBasePredictionSchema.TABLE_NAME, conf = hbaseConfig)
   }
 
-  override def makePrediction(): DataFrame = {
+  override def makePrediction(userSet: Dataset[User] = null, measureType: String = "cooc"): DataFrame = {
     val userSet = getHistory.select("userId", "COMPID")
       .map(row => UserCompPair(row.getInt(0), row.getInt(1)))
     val prediction = itemCFModel

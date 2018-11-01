@@ -4,10 +4,11 @@ let COMP = BASE + '/comps';
 let SEGMENT = BASE + '/segment';
 let THESAURUS = BASE + '/thesaurus/synonyms';
 let HISTORY = BASE + '/history';
-let RECOMMEND = BASE + '/recommend';
+let RECOMMEND = BASE + '/components/recommend';
 let ITEM = BASE + '/items';
 let USER = BASE + '/users';
 let EVENT = BASE + '/events';
 let QUERY_LOG = BASE + '/query';
+let REC = BASE + '/recommend';
 
-export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM, USER, EVENT, QUERY_LOG}
+export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM, USER, EVENT, QUERY_LOG, REC}

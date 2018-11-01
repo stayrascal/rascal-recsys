@@ -7,6 +7,7 @@ public class Recommendation {
   private long itemId;
   private String measureType;
   private float score;
+  private Item item;
 
   public Recommendation() {
   }
@@ -48,6 +49,14 @@ public class Recommendation {
 
   public void setScore(float score) {
     this.score = score;
+  }
+
+  public Item getItem() {
+    return item;
+  }
+
+  public void setItem(Item item) {
+    this.item = item;
   }
 
   @Override

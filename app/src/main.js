@@ -43,7 +43,8 @@ const router = new VueRouter({
     { path: '/history/add', component: HistoryAdd },
     { path: '', component: CompManage },
     { path: '/item', component: Item },
-    { path: '/login', component: Login }
+    { path: '/login', component: Login },
+    { path: '/recsys', component: RecommendManage },
   ]
 });
 

@@ -1,10 +1,11 @@
 package com.stayrascal.service.application.prediction
 
+import com.stayrascal.recom.cf.entities.User
 import com.stayrascal.service.application.domain.{Prediction, Recommendation}
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset}
 
 trait PredictionService {
-  def makePrediction(): DataFrame
+  def makePrediction(userSet: Dataset[User] = null, measureType: String): DataFrame
 
   def storePrediction(prediction: DataFrame): Unit
 
