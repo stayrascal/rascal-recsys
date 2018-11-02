@@ -52,13 +52,7 @@ public class RecommendController {
                                                @RequestParam("num") int num,
                                                @RequestParam("type") String measureType) {
     List<Recommendation> result = recommendService.recommendForUser(userId, num, measureType).stream()
-      .map(rec -> {
-        Recommendation recommendation = new Recommendation();
-        recommendation.setItem(itemService.searchItem(rec.getItemId()).get());
-        recommendation.setMeasureType(rec.getMeasureType());
-        recommendation.setScore(rec.getScore());
-        return recommendation;
-      }).collect(Collectors.toList());
+      .peek(rec -> rec.setItem(itemService.searchItem(rec.getItemId()).get())).collect(Collectors.toList());
     return ResponseEntity.ok(new RecommendResult(result));
   }
 }

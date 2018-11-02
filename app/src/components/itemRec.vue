@@ -11,10 +11,11 @@
     >
       <!--<v-progress-linear slot="progress" color="blue" indeterminate/>-->
       <template slot="items" slot-scope="props">
-        <td class="text-xs-left">{{ props.item.userId }}</td>
-        <td class="text-xs-left">{{ props.item.itemId }}</td>
+        <td class="text-xs-left">{{ props.item.item.title }}</td>
+        <td class="text-xs-left">{{ props.item.item.describe }}</td>
+        <td class="text-xs-left">{{ props.item.score }}</td>
         <td class="justify-center layout px-0">
-          <v-btn icon class="mx-0" @click="move(props.item)">
+          <v-btn icon class="mx-0" @click="move(props.item.item.url)">
             <v-icon color="blue-grey darken-2">call_split</v-icon>
           </v-btn>
         </td>
@@ -50,6 +51,11 @@
             sortable: false
           },
           {
+            text: 'Score',
+            value: 'score',
+            sortable: false
+          },
+          {
             text: 'Item Link',
             value: 'link',
             sortable: false
@@ -64,7 +70,7 @@
     methods: {
       personalizationRec() {
         this.isLoading = true;
-        this.$http.get(REC, {
+        this.$http.get(REC + "/items", {
           params: {
             userId: this.getCookie('username'),
             num: 5,
