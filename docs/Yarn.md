@@ -31,5 +31,13 @@ ApplicationMaster管理涉及到了4大类,ApplicationMasterLauncher,AMLivelines
 - NullRMStateStore--do nothing，什么都不做，就是不保存应用状态信息。
 - ZKRMStateStore--信息状态保存在Zookeeper中。
 
+### JournalNode
+JournalNode这个概念是在MR2也就是Yarn中新加的,journalNode的作用是存放EditLog的,在MR1中editlog是和fsimage存放在一起的然后SecondNamenode做定期合并
+JournalNode处于Active Namenode与StandBy Namenode之间，数量不一定只有1个,作用相当于NFS共享文件系统.Active Namenode往里写editlog数据,StandBy再从里面读取数据进行同步.
+但有多个JournalNode时，一定会存在一个类似管理者这样的角色存在,而这个管理者就是QJM,全程QuorumJournalManager.
+
+### Ganglia
+Ganglia的架构设计也是类似于Client-Server的模式,Client端会开启gmond进程进行客户端监控数据的收集,然后发给Server端,server端对数据进行收集并进行页面的展示。
+Ganglia对Hadoop进行了很完美的支持,Hadoop在Ganglia上定义了非常多细粒度的指标,基本涉及了非常多方面的统计信息.
 
   
