@@ -4,7 +4,7 @@ import java.sql.Connection
 import java.util
 import java.util.concurrent.CompletableFuture
 
-import com.stayrascal.service.application.common.{HistoryRecordFormatUtil, PhoenixPool}
+import com.stayrascal.service.application.common.{EventFormatUtil, PhoenixPool}
 import com.stayrascal.service.application.domain.{HistoryRecord, NumOfUsers, TotalFreq}
 import com.stayrascal.service.application.repository.HistoryRepository
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
@@ -48,7 +48,7 @@ class HistoryServiceImpl(@Autowired val sparkSession: SparkSession,
       ConsumerStrategies.Subscribe[String, String](properties.getTopics, properties.getKafkaParamsConsumer)
     )
       .map(_.value())
-      .filter(HistoryRecordFormatUtil.isValidate)
+      .filter(EventFormatUtil.isValidateHistory)
       .map(x => (x, 1L))
       // 窗口时间设定为4s，并统计这段时间内用户使用构件的次数
       .reduceByKeyAndWindow(_ + _, _ - _, Seconds(4), Seconds(4), 2)
@@ -98,7 +98,7 @@ class HistoryServiceImpl(@Autowired val sparkSession: SparkSession,
   }
 
   override def addHistoryRecord(historyRecord: String): Unit = {
-    if (!HistoryRecordFormatUtil.isValidate(historyRecord)) {
+    if (!EventFormatUtil.isValidateHistory(historyRecord)) {
       throw new HistoryFormatException(s"Invalid format for history string: $historyRecord")
     }
     val topic = properties.getTopics.get(0)
