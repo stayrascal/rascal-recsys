@@ -7,7 +7,7 @@ trait EventStreamService {
 
   def addEvent(event: String)
 
-  def getEventStream: DStream[(String, String, String, String)]
+  def getEventStream: DStream[(Long, Long, String, String)]
 
-  def saveEvent(eventStream: DStream[(String, String, String, String)])
+  def saveEvent(eventStream: DStream[(Long, Long, String, String)])
 }

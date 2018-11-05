@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture
 
 import com.stayrascal.service.application.common.{EventFormatUtil, PhoenixPool}
 import com.stayrascal.service.application.event.EventKafkaProperties
+import com.stayrascal.service.application.history.HistoryDBUtil
 import com.stayrascal.service.application.repository.EventRepository
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.spark.sql.SparkSession
@@ -37,7 +38,7 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
 
   override def addEvent(event: String): Unit = ???
 
-  override def getEventStream: DStream[(String, String, String, String)] = {
+  override def getEventStream: DStream[(Long, Long, String, String)] = {
     ssc.checkpoint(properties.getCheckpointDir)
     KafkaUtils.createDirectStream(
       ssc,
@@ -47,12 +48,12 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
       .filter(EventFormatUtil.isValidateHistory)
       .map(event => {
         val parts = event.split("-")
-        (parts(0), parts(1), parts(2), parts(4))
+        ((Long)parts(0), (Long)parts(1), parts(2), parts(4))
       })
 
   }
 
-  override def saveEvent(eventStream: DStream[(String, String, String, String)]): Unit = {
+  override def saveEvent(eventStream: DStream[(Long, Long, String, String)]): Unit = {
     eventStream.foreachRDD{ rdd => {
       rdd.foreachPartition(partitionEvents => {
         if (partitionEvents.nonEmpty){
@@ -62,8 +63,17 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
             val stat = conn.get.createStatement()
             conn.get.setAutoCommit(false)
             partitionEvents.foreach(tuple => {
-              stat.addBatch()
+              stat.addBatch(HistoryDBUtil.generateUpsertEventSql(tuple._1, tuple._2, tuple._3, tuple._4))
             })
+            stat.executeBatch()
+            conn.get.commit()
+          } catch {
+            case e: Exception =>
+              e.printStackTrace()
+          } finally {
+            if (conn.isDefined){
+              conn.get.close()
+            }
           }
         }
       })
