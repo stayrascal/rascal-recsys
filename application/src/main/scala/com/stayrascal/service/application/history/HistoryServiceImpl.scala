@@ -48,7 +48,7 @@ class HistoryServiceImpl(@Autowired val sparkSession: SparkSession,
       ConsumerStrategies.Subscribe[String, String](properties.getTopics, properties.getKafkaParamsConsumer)
     )
       .map(_.value())
-      .filter(EventFormatUtil.isValidateHistory)
+      .filter(EventFormatUtil.isValidEvent)
       .map(x => (x, 1L))
       // 窗口时间设定为4s，并统计这段时间内用户使用构件的次数
       .reduceByKeyAndWindow(_ + _, _ - _, Seconds(4), Seconds(4), 2)

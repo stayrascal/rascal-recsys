@@ -7,11 +7,11 @@ import com.stayrascal.service.application.common.{EventFormatUtil, PhoenixPool}
 import com.stayrascal.service.application.event.EventKafkaProperties
 import com.stayrascal.service.application.history.HistoryDBUtil
 import com.stayrascal.service.application.repository.EventRepository
-import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka010.{ConsumerStrategies, KafkaUtils, LocationStrategies}
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -36,7 +36,15 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
     })
   }
 
-  override def addEvent(event: String): Unit = ???
+  override def addEvent(event: String): Unit = {
+    if (!EventFormatUtil.isValidEvent(event)) {
+      throw new EventFormatException(s"Invalid format for history string: $event")
+    }
+    val topic = properties.getTopics.get(0)
+    eventProducer.send(new ProducerRecord[String, String](topic, event), new Callback {
+      override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {}
+    })
+  }
 
   override def getEventStream: DStream[(Long, Long, String, String)] = {
     ssc.checkpoint(properties.getCheckpointDir)
@@ -48,15 +56,15 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
       .filter(EventFormatUtil.isValidateHistory)
       .map(event => {
         val parts = event.split("-")
-        ((Long)parts(0), (Long)parts(1), parts(2), parts(4))
+        ((Long) parts (0), (Long) parts (1), parts(2), parts(4))
       })
 
   }
 
   override def saveEvent(eventStream: DStream[(Long, Long, String, String)]): Unit = {
-    eventStream.foreachRDD{ rdd => {
+    eventStream.foreachRDD { rdd => {
       rdd.foreachPartition(partitionEvents => {
-        if (partitionEvents.nonEmpty){
+        if (partitionEvents.nonEmpty) {
           var conn: Option[Connection] = None
           try {
             conn = Option.apply(PhoenixPool.getConnection)
@@ -71,14 +79,18 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
             case e: Exception =>
               e.printStackTrace()
           } finally {
-            if (conn.isDefined){
+            if (conn.isDefined) {
               conn.get.close()
             }
           }
         }
       })
-    }}
+    }
+    }
   }
 
-  override def destroy(): Unit = ???
+  override def destroy(): Unit = {
+    eventProducer.close()
+    ssc.stop()
+  }
 }
