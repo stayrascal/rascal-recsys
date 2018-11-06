@@ -56,7 +56,7 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
       .filter(EventFormatUtil.isValidateHistory)
       .map(event => {
         val parts = event.split("-")
-        ((Long) parts (0), (Long) parts (1), parts(2), parts(4))
+        (parts(0).toLong, parts(1).toLong, parts(2), parts(4))
       })
 
   }
