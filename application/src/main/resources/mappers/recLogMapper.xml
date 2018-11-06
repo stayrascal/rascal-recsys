@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stayrascal.service.application.repository.RecLogRepository">
+    <select id="getRecLogByUserId" resultType="RecLog">
+        SELECT * FROM recommend_logs WHERE userId = #{userId}
+    </select>
+
+    <select id="listRecLogs" resultType="RecLog">
+        SELECT * FROM recommend_logs
+    </select>
+
+    <insert id="addRecLog" parameterType="RecLog">
+        UPSERT INTO recommend_logs (userId, clickItemId, otherItems, createTime)
+        VALUES (#{log.userId}, #{log.clickItemId}, #{log.otherItems}, #{log.createTime})
+    </insert>
+</mapper>
