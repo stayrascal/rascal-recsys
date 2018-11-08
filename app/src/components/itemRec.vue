@@ -30,7 +30,7 @@
 
 <script>
   import _ from 'lodash'
-  import { REC } from '../configs/srapp.api'
+  import { REC, REC_LOG } from '../configs/srapp.api'
 
   export default {
     name: "itemRec",
@@ -99,11 +99,29 @@
       move(item) {
         this.addEvent(item);
         this.addQueryLog(item);
+        this.addRecLog(item);
         window.open(item.link, '_bank')
+      },
+      addRecLog(item) {
+        var ids = this.items.map(x => x.id);
+        ids.splice(ids.indexOf(item.id), 1);
+        this.$http.post(REC_LOG, {
+          userId: this.getCookie('username'),
+          clickItemId: item.id,
+          otherItems: ids.join(',')
+        }).then(v => v.json().then(result => {
+          if (result['numFound'] === 1) {
+            this.$message.success("Recommendation event: " + this.getCurrentUser() + " click recommendation " + item.id + " add succeed!")
+          }
+        }), error => {
+          if (error.status === 409) {
+            this.$message.error("Recommendation Event is already exist!")
+          }
+        });
       },
       addEvent(item) {
         var ids = this.items.map(x => x.id);
-        ids.splice(ids.indexOf(item.id), 1)
+        ids.splice(ids.indexOf(item.id), 1);
         this.$http.post(EVENT, {
           userId: this.getCookie('username'),
           action: 'VIEW',

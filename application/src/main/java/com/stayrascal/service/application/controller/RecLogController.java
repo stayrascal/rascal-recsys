@@ -24,7 +24,8 @@ public class RecLogController {
   @Autowired
   private RecLogService service;
 
-  @PostMapping(value = "/api/v1/rec")
+  @PostMapping(value = "/api/v1/" +
+    "")
   public ResponseEntity<Result> addQueryLog(@RequestBody RecLog log) {
     logger.debug("Adding recommendation history for user: {}", log.getUserId());
     RecLogQueryResult recResult = new RecLogQueryResult(Collections.singletonList(service.addRecLog(log)));

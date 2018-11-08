@@ -10,5 +10,6 @@ let USER = BASE + '/users';
 let EVENT = BASE + '/events';
 let QUERY_LOG = BASE + '/query';
 let REC = BASE + '/recommend';
+let REC_LOG = BASE + '/reclog';
 
-export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM, USER, EVENT, QUERY_LOG, REC}
+export  {COMP, SEGMENT, THESAURUS, HISTORY, RECOMMEND, ITEM, USER, EVENT, QUERY_LOG, REC, REC_LOG}
