@@ -74,7 +74,7 @@
           params: {
             userId: this.getCookie('username'),
             num: 5,
-            type: 'cooc'
+            type: 'regCorr'
           }
         }).then(response => {
           response.json().then(result => {

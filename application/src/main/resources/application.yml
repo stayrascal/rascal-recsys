@@ -25,6 +25,23 @@ kafka:
       "acks": all
       "[batch.size]": 200
       "[client.id]": history-producer
+  event:
+      topics:
+        - event
+      kafka-params-consumer:
+        "[bootstrap.servers]": localhost:9092
+        "[group.id]": event
+        "[key.deserializer]": org.apache.kafka.common.serialization.StringDeserializer
+        "[value.deserializer]": org.apache.kafka.common.serialization.StringDeserializer
+      kafka-params-producer:
+        "[bootstrap.servers]": localhost:9092
+        "[key.serializer]": org.apache.kafka.common.serialization.StringSerializer
+        "[value.serializer]": org.apache.kafka.common.serialization.StringSerializer
+        "[linger.ms]": 1
+        "acks": all
+        "[batch.size]": 200
+        "[client.id]": event-producer
+
 dict:
   syn:
     zkHosts: localhost:2181

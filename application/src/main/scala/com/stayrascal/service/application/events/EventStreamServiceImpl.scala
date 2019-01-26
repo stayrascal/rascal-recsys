@@ -4,7 +4,7 @@ import java.sql.Connection
 import java.util.concurrent.CompletableFuture
 
 import com.stayrascal.service.application.common.{EventFormatUtil, PhoenixPool}
-import com.stayrascal.service.application.event.EventKafkaProperties
+import com.stayrascal.service.application.event.{EventException, EventKafkaProperties}
 import com.stayrascal.service.application.history.HistoryDBUtil
 import com.stayrascal.service.application.repository.EventRepository
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
@@ -38,7 +38,7 @@ class EventStreamServiceImpl(@Autowired val sparkSession: SparkSession,
 
   override def addEvent(event: String): Unit = {
     if (!EventFormatUtil.isValidEvent(event)) {
-      throw new EventFormatException(s"Invalid format for history string: $event")
+      throw new EventException(s"Invalid format for history string: $event")
     }
     val topic = properties.getTopics.get(0)
     eventProducer.send(new ProducerRecord[String, String](topic, event), new Callback {

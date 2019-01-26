@@ -15,9 +15,11 @@
                 :counter="nameCharLen"
                 required
               ></v-text-field>
+
               <v-text-field
                 label="密码"
                 v-model="user.password"
+                type="password"
                 required
               ></v-text-field>
             </v-form>
