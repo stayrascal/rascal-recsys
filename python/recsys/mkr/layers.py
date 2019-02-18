@@ -64,12 +64,12 @@ class CrossCompressUnit(Layer):
 
     def _call(self, inputs):
         # [batch_size, dim]
-        v, e = inputs
-        v = tf.expand_dims(v, axis=2)
-        e = tf.expand_dims(e, axis=1)
+        item_emb, head_emb = inputs
+        item_emb = tf.expand_dims(item_emb, axis=2)
+        head_emb = tf.expand_dims(head_emb, axis=1)
 
         # [batch_size, dim, dim]
-        c_matrix = tf.matmul(v, e)
+        c_matrix = tf.matmul(item_emb, head_emb)
         c_matrix_transpose = tf.transpose(c_matrix, perm=[0, 2, 1])
 
         # [batch_size * dim, dim]

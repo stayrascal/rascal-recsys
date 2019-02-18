@@ -1,6 +1,7 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 from model import MKR
+import mlflow
 
 
 def train(args, data, show_loss, show_topk):
@@ -20,48 +21,60 @@ def train(args, data, show_loss, show_topk):
         user_list = np.random.choice(user_list, size=user_num, replace=False)
     item_set = set(list(range(n_item)))
 
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        for step in range(args.n_epochs):
-            np.random.shuffle(train_data)
-            start = 0
-            while start < train_data.shape[0]:
-                _, loss = model.train_rs(sess, get_feed_dict_for_rs(model, train_data, start, start + args.batch_size))
-                start += args.batch_size
-                if show_loss:
-                    print(loss)
-            
-            if step % args.kge_interval == 0:
-                np.random.shuffle(kg)
+    with mlflow.start_run():
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            for step in range(args.n_epochs):
+                np.random.shuffle(train_data)
                 start = 0
-                while start < kg.shape[0]:
-                    _, rmse = model.train_kge(sess, get_feed_dict_for_kge(model, kg, start, start + args.batch_size))
+                while start < train_data.shape[0]:
+                    _, loss = model.train_rs(sess, get_feed_dict_for_rs(model, train_data, start, start + args.batch_size))
                     start += args.batch_size
                     if show_loss:
-                        print(rmse)
-            
-            # CTR evaluation
-            train_auc, train_acc = model.eval(sess, get_feed_dict_for_rs(model, train_data, 0, train_data.shape[0]))
-            eval_auc, eval_acc = model.eval(sess, get_feed_dict_for_rs(model, eval_data, 0, eval_data.shape[0]))
-            test_auc, test_acc = model.eval(sess, get_feed_dict_for_rs(model, test_data, 0, test_data.shape[0]))
+                        print(loss)
 
-            print('epoch %d     train auc: %.4f acc: %.4f   eval auc: %.4f  acc: %.4f   test auc: %.4f  acc: %.4f' % (step, train_auc, train_acc, eval_auc, eval_acc, test_auc, test_acc))
+                if step % args.kge_interval == 0:
+                    np.random.shuffle(kg)
+                    start = 0
+                    while start < kg.shape[0]:
+                        _, rmse = model.train_kge(sess, get_feed_dict_for_kge(model, kg, start, start + args.batch_size))
+                        start += args.batch_size
+                        if show_loss:
+                            print(rmse)
 
-            if show_topk:
-                precision, recall, f1 = topk_eval(sess, model, user_list, train_record, test_record, item_set, k_list)
-                print('precision: ', end='')
-                for i in precision:
-                    print('%.4f\t' % i, end='')
-                print()
-                print('recall: ', end='')
-                for i in recall:
-                    print('%.4f\t' % i, end='')
-                print()
-                print('f1: ', end='')
-                for i in f1:
-                    print('%.4f\t' % i, end='')
-                print('\n')
-            
+                # CTR evaluation
+                train_auc, train_acc = model.eval(sess, get_feed_dict_for_rs(model, train_data, 0, train_data.shape[0]))
+                eval_auc, eval_acc = model.eval(sess, get_feed_dict_for_rs(model, eval_data, 0, eval_data.shape[0]))
+                test_auc, test_acc = model.eval(sess, get_feed_dict_for_rs(model, test_data, 0, test_data.shape[0]))
+                
+                mlflow.log_metric('train_auc', train_auc)
+                mlflow.log_metric('train_acc', train_acc)
+                mlflow.log_metric('eval_auc', eval_auc)
+                mlflow.log_metric('eval_acc', eval_acc)
+                mlflow.log_metric('test_auc', test_auc)
+                mlflow.log_metric('test_acc', test_acc)
+
+
+                print('epoch %d     train auc: %.4f acc: %.4f   eval auc: %.4f  acc: %.4f   test auc: %.4f  acc: %.4f' % (
+                step, train_auc, train_acc, eval_auc, eval_acc, test_auc, test_acc))
+
+                if show_topk:
+                    precision, recall, f1 = topk_eval(sess, model, user_list, train_record, test_record, item_set, k_list)
+                    print('precision: ', end='')
+                    for i in precision:
+                        print('%.4f\t' % i, end='')
+                    print()
+                    print('recall: ', end='')
+                    for i in recall:
+                        print('%.4f\t' % i, end='')
+                    print()
+                    print('f1: ', end='')
+                    for i in f1:
+                        print('%.4f\t' % i, end='')
+                    print('\n')
+                    # mlflow.log_metric('precision', precision)
+            mlflow.tensorflow.log_model(model, "model")
+
 
 def get_feed_dict_for_rs(model, data, start, end):
     feed_dict = {
@@ -72,6 +85,7 @@ def get_feed_dict_for_rs(model, data, start, end):
     }
     return feed_dict
 
+
 def get_feed_dict_for_kge(model, kg, start, end):
     feed_dict = {
         model.item_indices: kg[start:end, 0],
@@ -80,6 +94,7 @@ def get_feed_dict_for_kge(model, kg, start, end):
         model.tail_indices: kg[start:end, 2]
     }
     return feed_dict
+
 
 def topk_eval(sess, model, user_list, train_record, test_record, item_set, k_list):
     precision_list = {k: [] for k in k_list}
@@ -93,7 +108,7 @@ def topk_eval(sess, model, user_list, train_record, test_record, item_set, k_lis
             model.item_indices: test_item_list,
             model.head_indices: test_item_list
         })
-        
+
         for item, score in zip(items, scores):
             item_score_map[item] = score
         item_score_pair_sorted = sorted(item_score_map.items(), key=lambda x: x[1], reverse=True)
@@ -109,6 +124,7 @@ def topk_eval(sess, model, user_list, train_record, test_record, item_set, k_lis
     f1 = [2 / (1 / precision[i] + 1 / recall[i]) for i in range(len(k_list))]
 
     return precision, recall, f1
+
 
 def get_user_record(data, is_train):
     user_history_dict = dict()
